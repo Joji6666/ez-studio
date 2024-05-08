@@ -41,28 +41,34 @@ const Pad = () => {
   };
 
   const handleStart = async () => {
-    Tone.Transport.bpm.value = 120; // BPM 설정
-    const newSequence = new Tone.Sequence(
-      (time, step) => {
-        trakcs.forEach((track) => {
-          if (track.steps[step % steps].isChecked) {
-            loadedInstrument[track.instrument.url].start(time);
-          }
-        });
-      },
-      Array.from({ length: steps }, (_, i) => i),
-      "16n"
-    );
-
-    newSequence.start(0);
-    setSequence(newSequence);
-
     await Tone.start(); // Tone 오디오 컨텍스트를 활성화
     if (isPlaying) {
       setIsPlaying(false);
+      if (sequence) {
+        sequence.dispose(); // 컴포넌트 언마운트 시 시퀀스 해제
+      }
       Tone.Transport.stop();
     } else {
       setIsPlaying(true);
+
+      Tone.Transport.bpm.value = 120; // BPM 설정
+      const newSequence = new Tone.Sequence(
+        (time, step) => {
+          trakcs.forEach((track) => {
+            const currentStep = track.steps[step % steps];
+            if (currentStep.isChecked) {
+              const instrument = loadedInstrument[track.instrument.url];
+              instrument.start(time); // 오디오 재생
+            }
+          });
+        },
+        Array.from({ length: steps }, (_, i) => i),
+        "16n"
+      );
+
+      newSequence.start(0);
+      setSequence(newSequence);
+
       Tone.Transport.start();
     }
   };
