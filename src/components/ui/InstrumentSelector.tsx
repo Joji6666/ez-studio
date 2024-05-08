@@ -21,7 +21,7 @@ const InstrumentSelector = () => {
   return (
     <section className="instrument-selector-section">
       <article className="instrument-selector-article">
-        <span>Audio Files</span>
+        <span>Instrument Files</span>
         {groups.map((group) => {
           const groupItems = instruments.filter(
             (instrument) => instrument.group === group

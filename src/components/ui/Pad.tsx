@@ -1,17 +1,17 @@
 import { useState, useEffect } from "react";
-import { v1 } from "uuid";
 
 import * as Tone from "tone";
 import "../../styles/pad.scss";
 import { instruments } from "../../utils/instruments";
+import usePad from "../../stores/usePad";
 
 interface ISamples {
   [key: string]: Tone.Player;
 }
 
 const Pad = () => {
-  const [stepIds, setStepIds] = useState<string[]>([]);
-  const [trackIds, setTrackIds] = useState<string[]>([]);
+  const { trakcs, steps, addTrack } = usePad();
+
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [allLoaded, setAllLoaded] = useState<boolean>(false);
   const [medias, setMedias] = useState<ISamples>({});
@@ -52,33 +52,18 @@ const Pad = () => {
   };
 
   useEffect(() => {
-    const step = 16;
-    const stepIds = [];
-    const trackIds = [];
-    for (let index = 0; index < step; index++) {
-      stepIds.push(v1());
-    }
-
-    trackIds.push(v1());
-    trackIds.push(v1());
-    trackIds.push(v1());
-    trackIds.push(v1());
-
-    setStepIds(stepIds);
-
-    setTrackIds(trackIds);
     loadAudio();
   }, []);
 
   useEffect(() => {
-    if (allLoaded && stepIds.length > 0 && Object.keys(medias).length > 0) {
+    if (allLoaded && steps > 0 && Object.keys(medias).length > 0) {
       // 페이지 로드 시 한 번만 초기화
       Tone.Transport.bpm.value = 120; // BPM 설정
       const newSequence = new Tone.Sequence(
         (time, step) => {
           medias[instruments[step % instruments.length].name].start(time);
         },
-        Array.from({ length: stepIds.length }, (_, i) => i),
+        Array.from({ length: steps }, (_, i) => i),
         "16n"
       );
 
@@ -91,35 +76,36 @@ const Pad = () => {
         }
       };
     }
-  }, [allLoaded, stepIds.length, medias]); // 오디오 로드 완료 및 stepIds 설정 확인
+  }, [allLoaded, steps, medias]); // 오디오 로드 완료 및 stepIds 설정 확인
 
   return (
     <section className="pad-section">
       {allLoaded && (
         <article className="pad-article">
-          {trackIds.map((trackId) => (
-            <div key={trackId} className="track-wrapper">
+          {trakcs.map((track) => (
+            <div key={track.id} className="track-wrapper">
               <div className="selected-audio-wrapper">
                 <span>선택 된 악기</span>
               </div>
               <div className="checkbox-wrapper">
-                {stepIds.map((stepId) => (
-                  <div key={stepId} className="checkbox-content">
+                {track.steps.map((step) => (
+                  <div key={step.id} className="checkbox-content">
                     <input
                       className="checkbox-input"
-                      id={stepId}
+                      id={step.id}
                       type="checkbox"
-                      onChange={() => handleCheck(trackId, stepId)}
+                      onChange={() => handleCheck(track.id, step.id)}
                     />
-                    <label htmlFor={stepId}></label>
+                    <label htmlFor={step.id}></label>
                   </div>
                 ))}
               </div>
             </div>
           ))}
+          <button onClick={handleStart}>start</button>
+          <button onClick={addTrack}>Add Track</button>
         </article>
       )}
-      <button onClick={handleStart}>start</button>
     </section>
   );
 };
