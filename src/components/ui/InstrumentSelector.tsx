@@ -1,26 +1,49 @@
-import React from "react";
+import { useState } from "react";
 import { instruments } from "../../utils/instruments";
-import useInstrument from "../../stores/useInstrument";
 
+import "../../styles/instrument_selector.scss";
 const InstrumentSelector = () => {
   const groups: string[] = ["kicks", "hats", "claps", "snares"];
-  const { selectedIns, selectIns } = useInstrument();
+
+  const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
+
+  const handleSelect = (groupName: string) => {
+    if (expandedGroups.includes(groupName)) {
+      const filteredGroup = expandedGroups.filter(
+        (group) => group !== groupName
+      );
+      setExpandedGroups(filteredGroup);
+    } else {
+      setExpandedGroups((prev) => [...prev, groupName]);
+    }
+  };
+
   return (
-    <section>
-      <article>
+    <section className="instrument-selector-section">
+      <article className="instrument-selector-article">
+        <span>Audio Files</span>
         {groups.map((group) => {
           const groupItems = instruments.filter(
             (instrument) => instrument.group === group
           );
 
+          const isOpen = expandedGroups.includes(group);
+
           return (
-            <div key={group}>
-              <label>{group}</label>
-              <ul>
-                {groupItems.map((item) => (
-                  <li key={item.name}>{item.name}</li>
-                ))}
-              </ul>
+            <div className="panel-wrapper" key={group}>
+              <span className="group-title" onClick={() => handleSelect(group)}>
+                {group}
+              </span>
+
+              {isOpen && (
+                <ul>
+                  {groupItems.map((item) => (
+                    <li key={item.name}>
+                      <span>{item.name}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           );
         })}

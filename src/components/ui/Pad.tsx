@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { v1 } from "uuid";
 
 import * as Tone from "tone";
-import "../../styles/main.scss";
+import "../../styles/pad.scss";
 import { instruments } from "../../utils/instruments";
 
 interface ISamples {
@@ -60,6 +60,9 @@ const Pad = () => {
     }
 
     trackIds.push(v1());
+    trackIds.push(v1());
+    trackIds.push(v1());
+    trackIds.push(v1());
 
     setStepIds(stepIds);
 
@@ -91,11 +94,14 @@ const Pad = () => {
   }, [allLoaded, stepIds.length, medias]); // 오디오 로드 완료 및 stepIds 설정 확인
 
   return (
-    <div>
+    <section className="pad-section">
       {allLoaded && (
-        <>
+        <article className="pad-article">
           {trackIds.map((trackId) => (
             <div key={trackId} className="track-wrapper">
+              <div className="selected-audio-wrapper">
+                <span>선택 된 악기</span>
+              </div>
               <div className="checkbox-wrapper">
                 {stepIds.map((stepId) => (
                   <div key={stepId} className="checkbox-content">
@@ -106,16 +112,15 @@ const Pad = () => {
                       onChange={() => handleCheck(trackId, stepId)}
                     />
                     <label htmlFor={stepId}></label>
-                    {/* 레이블에 대한 커스텀 스타일 적용 */}
                   </div>
                 ))}
               </div>
             </div>
           ))}
-          <button onClick={handleStart}>start</button>
-        </>
+        </article>
       )}
-    </div>
+      <button onClick={handleStart}>start</button>
+    </section>
   );
 };
 

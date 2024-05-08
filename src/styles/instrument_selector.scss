@@ -1,0 +1,41 @@
+.instrument-selector-section {
+  height: 100vh;
+  width: 15%;
+  background-color: rgb(57, 56, 56);
+}
+
+.instrument-selector-article {
+  width: 100%;
+  height: 100%;
+}
+
+.panel-wrapper {
+  width: 100;
+}
+
+.group-title {
+  display: block;
+  background-color: red;
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px solid black;
+  width: 100%;
+  font-size: 18px;
+}
+
+ul {
+  padding: 0;
+  margin: 0;
+}
+
+li {
+  background-color: rgb(250, 103, 103);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  span {
+    font-size: 15px;
+    margin-left: 3px;
+  }
+}
