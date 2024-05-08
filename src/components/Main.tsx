@@ -1,6 +1,6 @@
-import InstrumentSelector from "./ui/InstrumentSelector";
-import Pad from "./ui/Pad";
-import "../styles/main.scss";
+import InstrumentSelector from "./ui/instrumentSelector/InstrumentSelector";
+import Pad from "./ui/pad/Pad";
+import "./main.scss";
 const Main = () => {
   return (
     <main>

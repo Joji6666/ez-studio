@@ -8,6 +8,7 @@ interface IInstrumentStore {
 const useInstrument = create<IInstrumentStore>((set) => ({
   selectedIns: "",
   selectIns: (newInsId: string) => set(() => ({ selectedIns: newInsId })),
+  
 }));
 
 export default useInstrument;

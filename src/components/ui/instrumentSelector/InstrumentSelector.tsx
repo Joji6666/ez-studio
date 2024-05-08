@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { instruments } from "../../utils/instruments";
+import { instruments } from "../../../constatns/instruments";
 
-import "../../styles/instrument_selector.scss";
+import "./style/instrument_selector.scss";
 const InstrumentSelector = () => {
   const groups: string[] = ["kicks", "hats", "claps", "snares"];
 
