@@ -15,6 +15,7 @@ const Pad = () => {
     initPad,
     setLoadedInstrument,
     handleCheck,
+    handleDrop,
   } = usePad();
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -63,7 +64,7 @@ const Pad = () => {
           });
         },
         Array.from({ length: steps }, (_, i) => i),
-        "16n"
+        "8n"
       );
 
       newSequence.start(0);
@@ -94,7 +95,11 @@ const Pad = () => {
       <article className="pad-article">
         {trakcs.map((track, trackIndex: number) => (
           <div key={track.id} className="track-wrapper">
-            <div className="selected-audio-wrapper">
+            <div
+              className="selected-audio-wrapper"
+              onDrop={(e) => handleDrop(e, trackIndex)}
+              onDragOver={(e) => e.preventDefault()}
+            >
               <span>{`${track.instrument.name ?? "악기 선택"}`}</span>
             </div>
             <div className="checkbox-wrapper">

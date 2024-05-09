@@ -1,14 +1,20 @@
 import { create } from "zustand";
-
-interface IInstrumentStore {
-  selectedIns: string;
-  selectIns: (newInsId: string) => void;
-}
+import type { IInstrumentStore } from "../util/instrument_selector_interface";
+import type { IInstrument } from "../../pad/util/pad_interface";
 
 const useInstrument = create<IInstrumentStore>((set) => ({
-  selectedIns: "",
-  selectIns: (newInsId: string) => set(() => ({ selectedIns: newInsId })),
-  
+  selectedIns: {
+    url: "",
+    name: "",
+    group: "",
+  },
+
+  handleDragStart: (
+    e: React.DragEvent<HTMLLIElement>,
+    instrument: IInstrument
+  ) => {
+    set(() => ({ selectedIns: instrument }));
+  },
 }));
 
 export default useInstrument;

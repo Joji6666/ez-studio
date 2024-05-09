@@ -28,4 +28,5 @@ export interface IPadStore {
   addTrack: () => void;
   setLoadedInstrument: (loadedInstrument: ILoadedInstrument) => void;
   handleCheck: (trackIndex: number, stepIndex: number) => void;
+  handleDrop: (e: React.DragEvent<HTMLDivElement>, trackIndex: number) => void;
 }

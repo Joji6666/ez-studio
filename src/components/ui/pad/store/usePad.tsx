@@ -7,6 +7,7 @@ import type {
   IStep,
   ITrack,
 } from "../util/pad_interface";
+import useInstrument from "../../instrumentSelector/store/useInstrument";
 
 const usePad = create<IPadStore>((set, get) => ({
   // values
@@ -92,6 +93,18 @@ const usePad = create<IPadStore>((set, get) => ({
         tempTracks[trackIndex].steps[stepIndex].isChecked = true;
       }
     }
+
+    set(() => ({
+      trakcs: tempTracks,
+    }));
+  },
+  handleDrop: (e: React.DragEvent<HTMLDivElement>, trackIndex: number) => {
+    e.preventDefault();
+
+    const tempTracks = structuredClone(get().trakcs);
+    const selectedIns = useInstrument.getState().selectedIns;
+
+    tempTracks[trackIndex].instrument = selectedIns;
 
     set(() => ({
       trakcs: tempTracks,

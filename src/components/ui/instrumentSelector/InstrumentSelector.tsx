@@ -2,8 +2,12 @@ import { useState } from "react";
 import { instruments } from "../../../constatns/instruments";
 
 import "./style/instrument_selector.scss";
+import useInstrument from "./store/useInstrument";
+
+const groups: string[] = ["kicks", "hats", "claps", "snares"];
+
 const InstrumentSelector = () => {
-  const groups: string[] = ["kicks", "hats", "claps", "snares"];
+  const { handleDragStart } = useInstrument();
 
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
 
@@ -38,7 +42,11 @@ const InstrumentSelector = () => {
               {isOpen && (
                 <ul>
                   {groupItems.map((item) => (
-                    <li key={item.name}>
+                    <li
+                      draggable
+                      key={item.name}
+                      onDragStart={(e) => handleDragStart(e, item)}
+                    >
                       <span>{item.name}</span>
                     </li>
                   ))}
