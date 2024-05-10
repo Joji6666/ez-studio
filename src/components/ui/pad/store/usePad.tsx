@@ -5,7 +5,6 @@ import type {
   ILoadedInstrument,
   IPadPattern,
   IPadStore,
-  IStep,
   ITrack,
 } from "../util/pad_interface";
 import useInstrument from "../../instrumentSelector/store/useInstrument";
@@ -18,46 +17,47 @@ const usePad = create<IPadStore>((set, get) => ({
   selectedTrack: "track1",
   // functions
   addTrack: () => {
-    const newSteps: IStep[] = [];
     const steps = get().steps;
     const track = get().trakcs;
-    for (let index = 0; index < steps; index++) {
-      newSteps.push({
-        id: v1(),
-        isChecked: false,
-      });
-    }
 
-    set((state) => ({
-      trakcs: [
-        ...state.trakcs,
+    const newTrack: ITrack = {
+      id: v1(),
+      trackName: `track${track.length + 1}`,
+      patterns: [
         {
           id: v1(),
-          trackName: `track${track.length + 1}`,
-          patterns: [
-            {
-              id: v1(),
-              instrument: instruments[0],
-              steps: newSteps,
-            },
-            {
-              id: v1(),
-              instrument: instruments[1],
-              steps: newSteps,
-            },
-            {
-              id: v1(),
-              instrument: instruments[2],
-              steps: newSteps,
-            },
-            {
-              id: v1(),
-              instrument: instruments[3],
-              steps: newSteps,
-            },
-          ],
+          instrument: instruments[0],
+          steps: [],
+        },
+        {
+          id: v1(),
+          instrument: instruments[1],
+          steps: [],
+        },
+        {
+          id: v1(),
+          instrument: instruments[2],
+          steps: [],
+        },
+        {
+          id: v1(),
+          instrument: instruments[3],
+          steps: [],
         },
       ],
+    };
+
+    newTrack.patterns.forEach((pattern) => {
+      for (let index = 0; index < steps; index++) {
+        pattern.steps.push({
+          id: v1(),
+          isChecked: false,
+        });
+      }
+    });
+
+    set((state) => ({
+      trakcs: [...state.trakcs, newTrack],
     }));
   },
   initPad: () => {
@@ -112,18 +112,22 @@ const usePad = create<IPadStore>((set, get) => ({
     patternIndex: number,
     stepIndex: number
   ) => {
+    const selectedTrack = get().selectedTrack;
     const tempTracks = structuredClone(get().trakcs);
-    const targetPattern = tempTracks[trackIndex].patterns[patternIndex];
-    const targetStep = targetPattern.steps[stepIndex];
-    if (targetStep) {
-      if (targetStep.isChecked) {
-        tempTracks[trackIndex].patterns[patternIndex].steps[
-          stepIndex
-        ].isChecked = false;
-      } else {
-        tempTracks[trackIndex].patterns[patternIndex].steps[
-          stepIndex
-        ].isChecked = true;
+
+    if (selectedTrack === tempTracks[trackIndex].id) {
+      const targetPattern = tempTracks[trackIndex].patterns[patternIndex];
+      const targetStep = targetPattern.steps[stepIndex];
+      if (targetStep) {
+        if (targetStep.isChecked) {
+          tempTracks[trackIndex].patterns[patternIndex].steps[
+            stepIndex
+          ].isChecked = false;
+        } else {
+          tempTracks[trackIndex].patterns[patternIndex].steps[
+            stepIndex
+          ].isChecked = true;
+        }
       }
     }
 

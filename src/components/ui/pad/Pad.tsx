@@ -58,13 +58,15 @@ const Pad = () => {
       const newSequence = new Tone.Sequence(
         (time, step) => {
           trakcs.forEach((track) => {
-            track.patterns.forEach((pattern) => {
-              const currentStep = pattern.steps[step % steps];
-              if (currentStep.isChecked) {
-                const instrument = loadedInstrument[pattern.instrument.url];
-                instrument.start(time); // 오디오 재생
-              }
-            });
+            if (selectedTrack === track.id) {
+              track.patterns.forEach((pattern) => {
+                const currentStep = pattern.steps[step % steps];
+                if (currentStep.isChecked) {
+                  const instrument = loadedInstrument[pattern.instrument.url];
+                  instrument.start(time); // 오디오 재생
+                }
+              });
+            }
           });
         },
         Array.from({ length: steps }, (_, i) => i),
