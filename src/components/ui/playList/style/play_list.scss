@@ -11,26 +11,46 @@
   position: fixed;
   width: 100%;
   background-color: black;
+  height: 20px;
 }
 
 .play-list-wrapper {
   margin-top: 20px;
-  width: 100%;
   height: 100%;
-  overflow-y: auto;
-  background-color: rgb(90, 89, 89);
+  display: flex;
+  flex-direction: column;
+
+  .track-title-wrapper {
+    background-color: blueviolet;
+    min-width: 100px;
+    max-width: 100px;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    span {
+      width: 100%;
+      display: block;
+    }
+  }
 
   .track-wrapper {
-    background-color: blue;
-    width: 100%;
     height: 50px;
     display: flex;
     flex-direction: row;
+    border-bottom: 1px solid black;
+    .track-contents-wrapper {
+      display: flex;
 
-    .track-title-wrapper {
-      background-color: blueviolet;
-      width: 15%;
       height: 100%;
+      flex-direction: row;
+
+      .track-contents-pattern-wrapper {
+        width: 50px;
+        height: 100%;
+        background-color: chartreuse;
+        border-right: 1px solid black;
+      }
     }
   }
 }

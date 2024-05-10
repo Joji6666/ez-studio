@@ -63,14 +63,6 @@ const Pad = () => {
   };
 
   useEffect(() => {
-    return () => {
-      if (sequence) {
-        sequence.dispose(); // 컴포넌트 언마운트 시 시퀀스 해제
-      }
-    };
-  }, []);
-
-  useEffect(() => {
     if (trakcs.length === 0) {
       initPad();
     }

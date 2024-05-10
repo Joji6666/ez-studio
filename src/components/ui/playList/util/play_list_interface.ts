@@ -16,4 +16,6 @@ export interface IPlayListTrack {
 
 export interface IPattern {
   id: string;
+  length: number;
+  x: number;
 }
