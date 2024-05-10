@@ -2,46 +2,28 @@ import { useState, useEffect } from "react";
 
 import * as Tone from "tone";
 import "./style/pad.scss";
-import { instruments } from "../../../constatns/instruments";
+
 import usePad from "./store/usePad";
-import type { ILoadedInstrument } from "./util/pad_interface";
+import useInstrument from "../instrumentSelector/store/useInstrument";
 
 const Pad = () => {
   const {
     trakcs,
     steps,
-    loadedInstrument,
     selectedTrack,
     addTrack,
     initPad,
-    setLoadedInstrument,
     handleCheck,
     handleDrop,
     handleTrackSelect,
   } = usePad();
+  const { loadedInstrument } = useInstrument();
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
 
   const [sequence, setSequence] = useState<Tone.Sequence<number> | undefined>(
     undefined
   );
-
-  const loadAudio = async () => {
-    const loaders = instruments.map((sample) =>
-      new Tone.Player(sample.url).toDestination()
-    );
-    const loadedMedias = await Promise.all(loaders);
-
-    const medias = instruments.reduce((acc, sample, index) => {
-      acc[sample.url] = loadedMedias[index];
-      return acc;
-    }, {} as ILoadedInstrument);
-
-    await Tone.loaded().then(() => {
-      // 페이지 로드 시 한 번만 초기화
-      setLoadedInstrument(medias);
-    });
-  };
 
   const handleStart = async () => {
     await Tone.start(); // Tone 오디오 컨텍스트를 활성화
@@ -81,8 +63,6 @@ const Pad = () => {
   };
 
   useEffect(() => {
-    loadAudio();
-
     return () => {
       if (sequence) {
         sequence.dispose(); // 컴포넌트 언마운트 시 시퀀스 해제

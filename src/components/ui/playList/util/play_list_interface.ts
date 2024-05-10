@@ -1,4 +1,4 @@
-import type { IInstrument } from "../../pad/util/pad_interface";
+import type { IInstrument } from "../../instrumentSelector/util/instrument_selector_interface";
 
 export interface IPlayListStore {
   totalStep: number;

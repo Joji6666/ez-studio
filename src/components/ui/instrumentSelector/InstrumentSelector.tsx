@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { instruments } from "../../../constatns/instruments";
 
 import "./style/instrument_selector.scss";
@@ -7,7 +7,7 @@ import useInstrument from "./store/useInstrument";
 const groups: string[] = ["kicks", "hats", "claps", "snares"];
 
 const InstrumentSelector = () => {
-  const { handleDragStart } = useInstrument();
+  const { handleDragStart, loadAudio } = useInstrument();
 
   const [expandedGroups, setExpandedGroups] = useState<string[]>([]);
 
@@ -21,6 +21,10 @@ const InstrumentSelector = () => {
       setExpandedGroups((prev) => [...prev, groupName]);
     }
   };
+
+  useEffect(() => {
+    loadAudio();
+  }, []);
 
   return (
     <section className="instrument-selector-section">

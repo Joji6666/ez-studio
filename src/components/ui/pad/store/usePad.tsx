@@ -1,12 +1,7 @@
 import { v1 } from "uuid";
 import { create } from "zustand";
 import { instruments } from "../../../../constatns/instruments";
-import type {
-  ILoadedInstrument,
-  IPadPattern,
-  IPadStore,
-  ITrack,
-} from "../util/pad_interface";
+import type { IPadPattern, IPadStore, ITrack } from "../util/pad_interface";
 import useInstrument from "../../instrumentSelector/store/useInstrument";
 
 const usePad = create<IPadStore>((set, get) => ({
@@ -102,11 +97,7 @@ const usePad = create<IPadStore>((set, get) => ({
       selectedTrack: newTrack.id,
     }));
   },
-  setLoadedInstrument: (loadedInstrument: ILoadedInstrument) => {
-    set(() => ({
-      loadedInstrument,
-    }));
-  },
+
   handleCheck: (
     trackIndex: number,
     patternIndex: number,

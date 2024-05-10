@@ -1,17 +1,8 @@
-import * as Tone from "tone";
+import { IInstrument } from "../../instrumentSelector/util/instrument_selector_interface";
 
 export interface IStep {
   id: string;
   isChecked: boolean;
-}
-export interface IInstrument {
-  url: string;
-  name: string;
-  group: string;
-}
-
-export interface ILoadedInstrument {
-  [key: string]: Tone.Player;
 }
 
 export interface ITrack {
@@ -29,11 +20,11 @@ export interface IPadPattern {
 export interface IPadStore {
   trakcs: ITrack[];
   steps: number;
-  loadedInstrument: ILoadedInstrument;
+
   selectedTrack: string;
   initPad: () => void;
   addTrack: () => void;
-  setLoadedInstrument: (loadedInstrument: ILoadedInstrument) => void;
+
   handleCheck: (
     trackIndex: number,
     patternIndex: number,
