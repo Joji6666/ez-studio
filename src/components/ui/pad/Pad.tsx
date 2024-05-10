@@ -11,11 +11,13 @@ const Pad = () => {
     trakcs,
     steps,
     loadedInstrument,
+    selectedTrack,
     addTrack,
     initPad,
     setLoadedInstrument,
     handleCheck,
     handleDrop,
+    handleTrackSelect,
   } = usePad();
 
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -56,11 +58,13 @@ const Pad = () => {
       const newSequence = new Tone.Sequence(
         (time, step) => {
           trakcs.forEach((track) => {
-            const currentStep = track.steps[step % steps];
-            if (currentStep.isChecked) {
-              const instrument = loadedInstrument[track.instrument.url];
-              instrument.start(time); // 오디오 재생
-            }
+            track.patterns.forEach((pattern) => {
+              const currentStep = pattern.steps[step % steps];
+              if (currentStep.isChecked) {
+                const instrument = loadedInstrument[pattern.instrument.url];
+                instrument.start(time); // 오디오 재생
+              }
+            });
           });
         },
         Array.from({ length: steps }, (_, i) => i),
@@ -93,32 +97,53 @@ const Pad = () => {
   return (
     <section className="pad-section">
       <article className="pad-article">
-        {trakcs.map((track, trackIndex: number) => (
-          <div key={track.id} className="track-wrapper">
-            <div
-              className="selected-audio-wrapper"
-              onDrop={(e) => handleDrop(e, trackIndex)}
-              onDragOver={(e) => e.preventDefault()}
-            >
-              <span>{`${track.instrument.name ?? "악기 선택"}`}</span>
-            </div>
-            <div className="checkbox-wrapper">
-              {track.steps.map((step, stepIndex: number) => (
-                <div key={step.id} className="checkbox-content">
-                  <input
-                    className="checkbox-input"
-                    id={step.id}
-                    type="checkbox"
-                    onChange={() => handleCheck(trackIndex, stepIndex)}
-                  />
-                  <label htmlFor={step.id}></label>
-                </div>
-              ))}
-            </div>
+        <div className="track-toolbar">
+          <select name="padTrackList" onChange={handleTrackSelect}>
+            {trakcs.map((track) => (
+              <option key={track.id} value={track.id}>
+                {track.trackName}
+              </option>
+            ))}
+          </select>
+          <div className="track-toolbar-button-wrapper">
+            <button onClick={handleStart}>start</button>
+            <button onClick={addTrack}>Add Track</button>
           </div>
-        ))}
-        <button onClick={handleStart}>start</button>
-        <button onClick={addTrack}>Add Track</button>
+        </div>
+        {trakcs.map(
+          (track, trackIndex) =>
+            selectedTrack === track.id && (
+              <div key={track.id} className="pad-track-wrapper">
+                {track.patterns.map((pattern, patternIndex: number) => (
+                  <div className="pattern-wrapper" key={pattern.id}>
+                    <div
+                      className="selected-audio-wrapper"
+                      onDrop={(e) => handleDrop(e, trackIndex, patternIndex)}
+                      onDragOver={(e) => e.preventDefault()}
+                    >
+                      <span>{`${pattern.instrument.name ?? "악기 선택"}`}</span>
+                    </div>
+                    <div className="checkbox-wrapper">
+                      {pattern.steps.map((step, stepIndex: number) => (
+                        <div key={step.id} className="checkbox-content">
+                          <input
+                            className="checkbox-input"
+                            id={step.id}
+                            type="checkbox"
+                            onChange={() =>
+                              handleCheck(trackIndex, patternIndex, stepIndex)
+                            }
+                            checked={step.isChecked}
+                          />
+                          <label htmlFor={step.id}></label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )
+        )}
       </article>
     </section>
   );

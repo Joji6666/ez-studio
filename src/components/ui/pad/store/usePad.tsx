@@ -3,6 +3,7 @@ import { create } from "zustand";
 import { instruments } from "../../../../constatns/instruments";
 import type {
   ILoadedInstrument,
+  IPadPattern,
   IPadStore,
   IStep,
   ITrack,
@@ -14,12 +15,12 @@ const usePad = create<IPadStore>((set, get) => ({
   trakcs: [],
   steps: 16,
   loadedInstrument: {},
-
+  selectedTrack: "track1",
   // functions
   addTrack: () => {
     const newSteps: IStep[] = [];
     const steps = get().steps;
-
+    const track = get().trakcs;
     for (let index = 0; index < steps; index++) {
       newSteps.push({
         id: v1(),
@@ -32,18 +33,35 @@ const usePad = create<IPadStore>((set, get) => ({
         ...state.trakcs,
         {
           id: v1(),
-          instrument: {
-            url: "",
-            name: "",
-            group: "",
-          },
-          steps: newSteps,
+          trackName: `track${track.length + 1}`,
+          patterns: [
+            {
+              id: v1(),
+              instrument: instruments[0],
+              steps: newSteps,
+            },
+            {
+              id: v1(),
+              instrument: instruments[1],
+              steps: newSteps,
+            },
+            {
+              id: v1(),
+              instrument: instruments[2],
+              steps: newSteps,
+            },
+            {
+              id: v1(),
+              instrument: instruments[3],
+              steps: newSteps,
+            },
+          ],
         },
       ],
     }));
   },
   initPad: () => {
-    const basicPadSetup: ITrack[] = [
+    const basicPadSetup: IPadPattern[] = [
       {
         id: v1(),
         instrument: instruments[0],
@@ -73,8 +91,15 @@ const usePad = create<IPadStore>((set, get) => ({
       }
     });
 
+    const newTrack: ITrack = {
+      id: v1(),
+      trackName: "track1",
+      patterns: basicPadSetup,
+    };
+
     set(() => ({
-      trakcs: basicPadSetup,
+      trakcs: [newTrack],
+      selectedTrack: newTrack.id,
     }));
   },
   setLoadedInstrument: (loadedInstrument: ILoadedInstrument) => {
@@ -82,15 +107,23 @@ const usePad = create<IPadStore>((set, get) => ({
       loadedInstrument,
     }));
   },
-  handleCheck: (trackIndex: number, stepIndex: number) => {
+  handleCheck: (
+    trackIndex: number,
+    patternIndex: number,
+    stepIndex: number
+  ) => {
     const tempTracks = structuredClone(get().trakcs);
-
-    const targetStep = tempTracks[trackIndex].steps[stepIndex];
+    const targetPattern = tempTracks[trackIndex].patterns[patternIndex];
+    const targetStep = targetPattern.steps[stepIndex];
     if (targetStep) {
       if (targetStep.isChecked) {
-        tempTracks[trackIndex].steps[stepIndex].isChecked = false;
+        tempTracks[trackIndex].patterns[patternIndex].steps[
+          stepIndex
+        ].isChecked = false;
       } else {
-        tempTracks[trackIndex].steps[stepIndex].isChecked = true;
+        tempTracks[trackIndex].patterns[patternIndex].steps[
+          stepIndex
+        ].isChecked = true;
       }
     }
 
@@ -98,16 +131,25 @@ const usePad = create<IPadStore>((set, get) => ({
       trakcs: tempTracks,
     }));
   },
-  handleDrop: (e: React.DragEvent<HTMLDivElement>, trackIndex: number) => {
+  handleDrop: (
+    e: React.DragEvent<HTMLDivElement>,
+    trackIndex: number,
+    patternIndex: number
+  ) => {
     e.preventDefault();
 
     const tempTracks = structuredClone(get().trakcs);
     const selectedIns = useInstrument.getState().selectedIns;
 
-    tempTracks[trackIndex].instrument = selectedIns;
+    tempTracks[trackIndex].patterns[patternIndex].instrument = selectedIns;
 
     set(() => ({
       trakcs: tempTracks,
+    }));
+  },
+  handleTrackSelect: (e: React.ChangeEvent<HTMLSelectElement>) => {
+    set(() => ({
+      selectedTrack: e.target.value,
     }));
   },
 }));

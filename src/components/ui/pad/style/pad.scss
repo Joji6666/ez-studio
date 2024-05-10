@@ -1,5 +1,19 @@
 .pad-section {
   width: 30%;
+  border: 1px solid black;
+}
+
+.track-toolbar {
+  border-bottom: 1px solid black;
+  display: flex;
+  flex-direction: row;
+  padding: 3px;
+
+  .track-toolbar-button-wrapper {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+  }
 }
 
 .pad-article {
@@ -14,25 +28,35 @@ button {
   background-color: red;
 }
 
-.track-wrapper {
-  height: 30px;
+.pad-track-wrapper {
+  height: 100%;
   display: flex;
-  flex-direction: row;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid black;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  margin-top: 10px;
+  border-top: 1px solid black;
 
-  .selected-audio-wrapper {
-    height: 100%;
-    width: 20%;
+  .pattern-wrapper {
+    width: 100%;
+    height: 30px;
     display: flex;
     flex-direction: row;
+    justify-content: space-between;
     align-items: center;
-    justify-content: center;
-    border-right: 1px solid black;
-    span {
-      display: block;
-      font-size: 10px;
+    border-bottom: 1px solid black;
+    .selected-audio-wrapper {
+      height: 100%;
+      width: 20%;
+      display: flex;
+      flex-direction: row;
+      align-items: center;
+      justify-content: center;
+      border-right: 1px solid black;
+      span {
+        display: block;
+        font-size: 10px;
+      }
     }
   }
 }

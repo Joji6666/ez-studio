@@ -1,7 +1,36 @@
 .play-list-section {
   width: 65%;
   height: 100vh;
-  background-color: rgb(90, 89, 89);
   overflow-y: auto;
   overflow-x: auto;
+  display: flex;
+  flex-direction: column;
+}
+
+.timeline-bar {
+  position: fixed;
+  width: 100%;
+  background-color: black;
+}
+
+.play-list-wrapper {
+  margin-top: 20px;
+  width: 100%;
+  height: 100%;
+  overflow-y: auto;
+  background-color: rgb(90, 89, 89);
+
+  .track-wrapper {
+    background-color: blue;
+    width: 100%;
+    height: 50px;
+    display: flex;
+    flex-direction: row;
+
+    .track-title-wrapper {
+      background-color: blueviolet;
+      width: 15%;
+      height: 100%;
+    }
+  }
 }

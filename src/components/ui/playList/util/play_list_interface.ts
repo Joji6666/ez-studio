@@ -1,14 +1,19 @@
-import type { ITrack } from "../../pad/util/pad_interface";
+import type { IInstrument } from "../../pad/util/pad_interface";
 
 export interface IPlayListStore {
-  tracks: IPlayListTrack[];
+  totalStep: number;
+  playListTracks: IPlayListTrack[];
+  initPlayList: () => void;
 }
 
 export interface IPlayListTrack {
-  track: IPlayListTrack;
+  id: string;
+  height: number;
+  trackName: string;
+  patterns: IPattern[];
+  instrument?: IInstrument;
 }
 
-export interface IPlayListTrack extends ITrack {
-  x: number;
-  width: number;
+export interface IPattern {
+  id: string;
 }
