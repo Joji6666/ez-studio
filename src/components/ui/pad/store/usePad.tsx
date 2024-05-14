@@ -1,19 +1,30 @@
 import { v1 } from "uuid";
 import { create } from "zustand";
+import * as Tone from "tone";
 import { instruments } from "../../../../constatns/instruments";
 import type { IPadPattern, IPadStore, ITrack } from "../util/pad_interface";
 import useInstrument from "../../instrumentSelector/store/useInstrument";
+import useTopToolbar from "../../topToolbar.tsx/store/useTopToolbar";
 
 const usePad = create<IPadStore>((set, get) => ({
   // values
-  trakcs: [],
+  tracks: [],
   steps: 16,
   loadedInstrument: {},
-  selectedTrack: "track1",
+  selectedTrackId: "track1",
+  selectedTrack: {
+    trackName: "",
+    id: "",
+    patterns: [],
+    totalDuration: 0,
+  },
+  noteValue: "8n",
+  padSequence: undefined,
+  isPadPlaying: false,
   // functions
   addTrack: () => {
     const steps = get().steps;
-    const track = get().trakcs;
+    const track = get().tracks;
 
     const newTrack: ITrack = {
       id: v1(),
@@ -40,6 +51,7 @@ const usePad = create<IPadStore>((set, get) => ({
           steps: [],
         },
       ],
+      totalDuration: 0,
     };
 
     newTrack.patterns.forEach((pattern) => {
@@ -52,7 +64,7 @@ const usePad = create<IPadStore>((set, get) => ({
     });
 
     set((state) => ({
-      trakcs: [...state.trakcs, newTrack],
+      tracks: [...state.tracks, newTrack],
     }));
   },
   initPad: () => {
@@ -90,11 +102,13 @@ const usePad = create<IPadStore>((set, get) => ({
       id: v1(),
       trackName: "track1",
       patterns: basicPadSetup,
+      totalDuration: 0,
     };
 
     set(() => ({
-      trakcs: [newTrack],
-      selectedTrack: newTrack.id,
+      tracks: [newTrack],
+      selectedTrack: newTrack,
+      selectedTrackId: newTrack.id,
     }));
   },
 
@@ -103,10 +117,10 @@ const usePad = create<IPadStore>((set, get) => ({
     patternIndex: number,
     stepIndex: number
   ) => {
-    const selectedTrack = get().selectedTrack;
-    const tempTracks = structuredClone(get().trakcs);
+    const selectedTrackId = get().selectedTrackId;
+    const tempTracks = structuredClone(get().tracks);
 
-    if (selectedTrack === tempTracks[trackIndex].id) {
+    if (selectedTrackId === tempTracks[trackIndex].id) {
       const targetPattern = tempTracks[trackIndex].patterns[patternIndex];
       const targetStep = targetPattern.steps[stepIndex];
       if (targetStep) {
@@ -123,7 +137,7 @@ const usePad = create<IPadStore>((set, get) => ({
     }
 
     set(() => ({
-      trakcs: tempTracks,
+      tracks: tempTracks,
     }));
   },
   handleDrop: (
@@ -133,19 +147,86 @@ const usePad = create<IPadStore>((set, get) => ({
   ) => {
     e.preventDefault();
 
-    const tempTracks = structuredClone(get().trakcs);
+    const tempTracks = structuredClone(get().tracks);
     const selectedIns = useInstrument.getState().selectedIns;
 
     tempTracks[trackIndex].patterns[patternIndex].instrument = selectedIns;
 
     set(() => ({
-      trakcs: tempTracks,
+      tracks: tempTracks,
     }));
   },
   handleTrackSelect: (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const parsedValue: ITrack = JSON.parse(e.target.value);
+
     set(() => ({
-      selectedTrack: e.target.value,
+      selectedTrackId: parsedValue.id,
+      selectedTrack: parsedValue,
     }));
+  },
+  handleNoteValue: (e: React.ChangeEvent<HTMLSelectElement>) => {
+    set(() => ({
+      noteValue: e.target.value,
+    }));
+  },
+  handlePadPlay: async () => {
+    const isPadPlaying = get().isPadPlaying;
+    const padSequence = get().padSequence;
+    const steps = get().steps;
+    const tracks = get().tracks;
+    const noteValue = get().noteValue;
+    const selectedTrackId = get().selectedTrackId;
+    const loadedInstrument = useInstrument.getState().loadedInstrument;
+    const bpm = useTopToolbar.getState().bpm;
+    const analyzer = useTopToolbar.getState().analyzer;
+    await Tone.start(); // Tone 오디오 컨텍스트를 활성화
+    if (isPadPlaying) {
+      set(() => ({
+        isPadPlaying: false,
+      }));
+      if (padSequence) {
+        padSequence.dispose(); // 컴포넌트 언마운트 시 시퀀스 해제
+      }
+
+      if (analyzer) {
+        analyzer.dispose();
+        useTopToolbar.setState({ analyzer: null });
+      }
+
+      Tone.Transport.stop();
+    } else {
+      Tone.Transport.bpm.value = bpm; // BPM 설정
+      // const totalDuration = calculateSequenceDuration(120, steps, "8n");
+      const analyzer = new Tone.Analyser("fft", 32);
+      const newSequence = new Tone.Sequence(
+        (time, step) => {
+          tracks.forEach((track) => {
+            if (selectedTrackId === track.id) {
+              track.patterns.forEach((pattern) => {
+                const currentStep = pattern.steps[step % steps];
+                if (currentStep.isChecked) {
+                  const instrument = loadedInstrument[pattern.instrument.url];
+                  instrument.start(time); // 오디오 재생
+                  instrument.connect(analyzer);
+                  analyzer.toDestination();
+                }
+              });
+            }
+          });
+        },
+        Array.from({ length: steps }, (_, i) => i),
+        noteValue
+      );
+
+      newSequence.start(0);
+      useTopToolbar.setState({ analyzer });
+      set(() => ({
+        isPadPlaying: true,
+        padSequence: newSequence,
+      }));
+
+      Tone.Transport.start();
+    }
   },
 }));
 

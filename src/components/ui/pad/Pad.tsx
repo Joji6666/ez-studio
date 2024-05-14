@@ -1,92 +1,61 @@
-import { useState, useEffect } from "react";
-
-import * as Tone from "tone";
+import { useEffect } from "react";
 import "./style/pad.scss";
-
 import usePad from "./store/usePad";
-import useInstrument from "../instrumentSelector/store/useInstrument";
+import usePlayList, { noteValues } from "../playList/store/usePlayList";
 
 const Pad = () => {
   const {
-    trakcs,
-    steps,
-    selectedTrack,
+    tracks,
+    selectedTrackId,
     addTrack,
     initPad,
     handleCheck,
     handleDrop,
     handleTrackSelect,
+    handleNoteValue,
+    handlePadPlay,
   } = usePad();
-  const { loadedInstrument } = useInstrument();
-
-  const [isPlaying, setIsPlaying] = useState<boolean>(false);
-
-  const [sequence, setSequence] = useState<Tone.Sequence<number> | undefined>(
-    undefined
-  );
-
-  const handleStart = async () => {
-    await Tone.start(); // Tone 오디오 컨텍스트를 활성화
-    if (isPlaying) {
-      setIsPlaying(false);
-      if (sequence) {
-        sequence.dispose(); // 컴포넌트 언마운트 시 시퀀스 해제
-      }
-      Tone.Transport.stop();
-    } else {
-      setIsPlaying(true);
-
-      Tone.Transport.bpm.value = 120; // BPM 설정
-      const newSequence = new Tone.Sequence(
-        (time, step) => {
-          trakcs.forEach((track) => {
-            if (selectedTrack === track.id) {
-              track.patterns.forEach((pattern) => {
-                const currentStep = pattern.steps[step % steps];
-                if (currentStep.isChecked) {
-                  const instrument = loadedInstrument[pattern.instrument.url];
-                  instrument.start(time); // 오디오 재생
-                }
-              });
-            }
-          });
-        },
-        Array.from({ length: steps }, (_, i) => i),
-        "8n"
-      );
-
-      newSequence.start(0);
-      setSequence(newSequence);
-
-      Tone.Transport.start();
-    }
-  };
+  const { insertTrack } = usePlayList();
 
   useEffect(() => {
-    if (trakcs.length === 0) {
+    if (tracks.length === 0) {
       initPad();
     }
-  }, [trakcs]);
+  }, [tracks]);
 
   return (
     <section className="pad-section">
       <article className="pad-article">
         <div className="track-toolbar">
           <select name="padTrackList" onChange={handleTrackSelect}>
-            {trakcs.map((track) => (
-              <option key={track.id} value={track.id}>
+            {tracks.map((track) => (
+              <option key={track.id} value={JSON.stringify(track)}>
                 {track.trackName}
               </option>
             ))}
           </select>
+
+          <select
+            name="padTrackList"
+            onChange={handleNoteValue}
+            defaultValue={"8n"}
+          >
+            {noteValues.map((note) => (
+              <option key={note.key} value={note.key}>
+                {note.label}
+              </option>
+            ))}
+          </select>
+
           <div className="track-toolbar-button-wrapper">
-            <button onClick={handleStart}>start</button>
+            <button onClick={handlePadPlay}>start</button>
             <button onClick={addTrack}>Add Track</button>
+            <button onClick={insertTrack}>Insert Track</button>
           </div>
         </div>
-        {trakcs.map(
+        {tracks.map(
           (track, trackIndex) =>
-            selectedTrack === track.id && (
+            selectedTrackId === track.id && (
               <div key={track.id} className="pad-track-wrapper">
                 {track.patterns.map((pattern, patternIndex: number) => (
                   <div className="pattern-wrapper" key={pattern.id}>

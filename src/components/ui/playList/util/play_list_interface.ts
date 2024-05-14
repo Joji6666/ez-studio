@@ -1,9 +1,12 @@
 import type { IInstrument } from "../../instrumentSelector/util/instrument_selector_interface";
-
+import * as Tone from "tone";
 export interface IPlayListStore {
   totalStep: number;
   playListTracks: IPlayListTrack[];
-  initPlayList: () => void;
+  isPlayListPlaying: boolean;
+  playListSequence: Tone.Sequence<number> | undefined;
+  insertTrack: () => void;
+  handleStart: () => void;
 }
 
 export interface IPlayListTrack {
@@ -12,10 +15,24 @@ export interface IPlayListTrack {
   trackName: string;
   patterns: IPattern[];
   instrument?: IInstrument;
+  trackId: string;
 }
 
 export interface IPattern {
   id: string;
   length: number;
   x: number;
+  pattern: IPlayListPattern[];
+  totalDuration: number;
+}
+
+export interface IPlayListPattern {
+  id: string;
+  instrument: IInstrument;
+  steps: IPlayListStep[];
+}
+
+export interface IPlayListStep {
+  id: string;
+  isChecked: boolean;
 }

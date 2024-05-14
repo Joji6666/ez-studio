@@ -1,14 +1,7 @@
-import { useEffect } from "react";
 import "./style/play_list.scss";
 import usePlayList from "./store/usePlayList";
 const PlayList = () => {
-  const { playListTracks, initPlayList } = usePlayList();
-
-  useEffect(() => {
-    if (playListTracks.length === 0) {
-      initPlayList();
-    }
-  }, []);
+  const { playListTracks } = usePlayList();
 
   return (
     <section className="play-list-section">

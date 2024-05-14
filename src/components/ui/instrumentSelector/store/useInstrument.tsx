@@ -27,6 +27,7 @@ const useInstrument = create<IInstrumentStore>((set) => ({
     );
     const loadedMedias = await Promise.all(loaders);
 
+    console.log(loadedMedias, "loaded medias@");
     const medias = instruments.reduce((acc, sample, index) => {
       acc[sample.url] = loadedMedias[index];
       return acc;
