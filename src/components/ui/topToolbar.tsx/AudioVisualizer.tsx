@@ -15,7 +15,7 @@ const AudioVisualizer = () => {
     if (canvas && analyzer) {
       const ctx: CanvasRenderingContext2D | null = canvas.getContext("2d");
       const values = analyzer.getValue();
-      console.log(values, "values@");
+
       if (ctx) {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
         ctx.fillStyle = "#00ff00";

@@ -23,7 +23,7 @@ export interface IPadStore {
   steps: number;
   selectedTrackId: string;
   selectedTrack: ITrack;
-  noteValue: string;
+
   padSequence: Tone.Sequence<number> | undefined;
   isPadPlaying: boolean;
   initPad: () => void;
@@ -40,6 +40,6 @@ export interface IPadStore {
     patternIndex: number
   ) => void;
   handleTrackSelect: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  handleNoteValue: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+
   handlePadPlay: () => void;
 }

@@ -18,7 +18,6 @@ const usePad = create<IPadStore>((set, get) => ({
     patterns: [],
     totalDuration: 0,
   },
-  noteValue: "8n",
   padSequence: undefined,
   isPadPlaying: false,
   // functions
@@ -164,17 +163,13 @@ const usePad = create<IPadStore>((set, get) => ({
       selectedTrack: parsedValue,
     }));
   },
-  handleNoteValue: (e: React.ChangeEvent<HTMLSelectElement>) => {
-    set(() => ({
-      noteValue: e.target.value,
-    }));
-  },
+
   handlePadPlay: async () => {
     const isPadPlaying = get().isPadPlaying;
     const padSequence = get().padSequence;
     const steps = get().steps;
     const tracks = get().tracks;
-    const noteValue = get().noteValue;
+    const noteValue = useTopToolbar.getState().noteValue;
     const selectedTrackId = get().selectedTrackId;
     const loadedInstrument = useInstrument.getState().loadedInstrument;
     const bpm = useTopToolbar.getState().bpm;
@@ -196,8 +191,13 @@ const usePad = create<IPadStore>((set, get) => ({
       Tone.Transport.stop();
     } else {
       Tone.Transport.bpm.value = bpm; // BPM 설정
+
+      // 이펙트 초기화
+      // const pitchShift = new Tone.PitchShift(1).toDestination();
+
       // const totalDuration = calculateSequenceDuration(120, steps, "8n");
       const analyzer = new Tone.Analyser("fft", 32);
+
       const newSequence = new Tone.Sequence(
         (time, step) => {
           tracks.forEach((track) => {
@@ -206,9 +206,9 @@ const usePad = create<IPadStore>((set, get) => ({
                 const currentStep = pattern.steps[step % steps];
                 if (currentStep.isChecked) {
                   const instrument = loadedInstrument[pattern.instrument.url];
-                  instrument.start(time); // 오디오 재생
                   instrument.connect(analyzer);
                   analyzer.toDestination();
+                  instrument.start(time); // 오디오 재생
                 }
               });
             }

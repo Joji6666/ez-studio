@@ -1,18 +1,18 @@
 import { useEffect } from "react";
 import "./style/pad.scss";
 import usePad from "./store/usePad";
-import usePlayList, { noteValues } from "../playList/store/usePlayList";
+import usePlayList from "../playList/store/usePlayList";
 
 const Pad = () => {
   const {
     tracks,
     selectedTrackId,
+    isPadPlaying,
     addTrack,
     initPad,
     handleCheck,
     handleDrop,
     handleTrackSelect,
-    handleNoteValue,
     handlePadPlay,
   } = usePad();
   const { insertTrack } = usePlayList();
@@ -35,20 +35,15 @@ const Pad = () => {
             ))}
           </select>
 
-          <select
-            name="padTrackList"
-            onChange={handleNoteValue}
-            defaultValue={"8n"}
-          >
-            {noteValues.map((note) => (
-              <option key={note.key} value={note.key}>
-                {note.label}
-              </option>
-            ))}
-          </select>
-
           <div className="track-toolbar-button-wrapper">
-            <button onClick={handlePadPlay}>start</button>
+            <button onClick={handlePadPlay}>
+              <img
+                src={!isPadPlaying ? "icons/play.svg" : "icons/pause.svg"}
+                width={15}
+                height={15}
+                alt="play-btn"
+              />
+            </button>
             <button onClick={addTrack}>Add Track</button>
             <button onClick={insertTrack}>Insert Track</button>
           </div>

@@ -10,6 +10,7 @@ const Main = () => {
       <TopToolbar />
       <InstrumentSelector />
       <Pad />
+
       <PlayList />
     </main>
   );

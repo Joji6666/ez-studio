@@ -1,12 +1,15 @@
 import type { IInstrument } from "../../instrumentSelector/util/instrument_selector_interface";
 import * as Tone from "tone";
 export interface IPlayListStore {
+  currentStep: number;
   totalStep: number;
   playListTracks: IPlayListTrack[];
   isPlayListPlaying: boolean;
   playListSequence: Tone.Sequence<number> | undefined;
+  trackListWrapperScrollHeight: number;
   insertTrack: () => void;
   handleStart: () => void;
+  increaseStep: () => void;
 }
 
 export interface IPlayListTrack {
