@@ -1,6 +1,7 @@
 .play-list-section {
   width: 54.8%;
-  height: 700px;
+  height: 100vh;
+  overflow-y: auto;
 }
 
 .play-list-article {
@@ -43,7 +44,7 @@
 
       .timeline-bar-line {
         width: 3px; /* 선의 너비 */
-        height: 700px; /* 타임라인 높이 - 삼각형 높이 */
+        height: 100vh; /* 타임라인 높이 - 삼각형 높이 */
         background-color: red; /* 선의 색상 */
       }
     }
@@ -59,7 +60,7 @@
   scrollbar-gutter: stable; /* 스크롤바 공간을 양쪽에 확보 */
 
   .track-list-wrapper {
-    height: 700px;
+    height: 100%;
     width: 8.2%;
     background-color: chocolate;
     display: flex;
@@ -82,11 +83,11 @@
 
   .track-wrapper {
     width: 92%;
-    height: auto;
+
     overflow-x: auto;
     display: flex;
     flex-direction: column;
-    overflow-y: hidden; /* y축 스크롤 숨기기 */
+
     .track-contents-wrapper {
       display: flex;
       min-height: 60px;

@@ -1,17 +1,16 @@
 import "./style/play_list.scss";
 import usePlayList from "./store/usePlayList";
 import useTopToolbar from "../topToolbar.tsx/store/useTopToolbar";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 const PlayList = () => {
   const {
     playListTracks,
     isPlayListPlaying,
-    trackListWrapperScrollHeight,
+    playListSectionScrollHeight,
     increaseStep,
   } = usePlayList();
   const { bpm } = useTopToolbar();
   const [xPosition, setXPosition] = useState(0);
-  const trackWrapperRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     let interval = null;
@@ -33,20 +32,6 @@ const PlayList = () => {
     };
   }, [isPlayListPlaying, bpm]);
 
-  //   useEffect(() => {
-  //     if (trackWrapperRef.current) {
-  //       const trackListWrapper = document.querySelector(".track-list-wrapper");
-
-  //       if (trackListWrapper) {
-  //         if (trackWrapperRef.current) {
-  //           trackWrapperRef.current.style.height = `${trackListWrapper.scrollHeight}px`;
-  //         }
-  //       }
-  //     }
-  //   }, [playListTracks]);
-
-  // 49.4
-
   return (
     <section className="play-list-section">
       <article className="play-list-article">
@@ -66,7 +51,15 @@ const PlayList = () => {
         </div>
 
         <div className="play-list-wrapper">
-          <div className="track-list-wrapper">
+          <div
+            className="track-list-wrapper"
+            style={{
+              height:
+                playListSectionScrollHeight > 0
+                  ? `${playListSectionScrollHeight + 60}px`
+                  : "100%",
+            }}
+          >
             {playListTracks.map((playListTrack) => (
               <div
                 className="track-title-wrapper"
@@ -78,11 +71,10 @@ const PlayList = () => {
           </div>
           <div
             className="track-wrapper"
-            ref={trackWrapperRef}
             style={{
               height:
-                trackListWrapperScrollHeight > 0
-                  ? `${trackListWrapperScrollHeight + 60}px`
+                playListSectionScrollHeight > 0
+                  ? `${playListSectionScrollHeight + 10}px`
                   : "100%",
             }}
           >

@@ -16,7 +16,7 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
   totalStep: 0,
   isPlayListPlaying: false,
   playListSequence: undefined,
-  trackListWrapperScrollHeight: 0,
+  playListSectionScrollHeight: 0,
   insertTrack: () => {
     const { tracks, selectedTrackId } = usePad.getState();
     const playListTracks = structuredClone(get().playListTracks);
@@ -58,11 +58,11 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
           trackName: selectedTrack.trackName,
           trackId: selectedTrack.id,
         };
-        const trackListWrapper = document.querySelector(".track-list-wrapper");
+        const playListSection = document.querySelector(".play-list-section");
 
-        if (trackListWrapper) {
+        if (playListSection) {
           set(() => ({
-            trackListWrapperScrollHeight: trackListWrapper.scrollHeight,
+            playListSectionScrollHeight: playListSection.scrollHeight,
           }));
         }
         set((state) => ({

@@ -6,7 +6,7 @@ export interface IPlayListStore {
   playListTracks: IPlayListTrack[];
   isPlayListPlaying: boolean;
   playListSequence: Tone.Sequence<number> | undefined;
-  trackListWrapperScrollHeight: number;
+  playListSectionScrollHeight: number;
   insertTrack: () => void;
   handleStart: () => void;
   increaseStep: () => void;
