@@ -4,6 +4,7 @@
   display: flex;
   flex-direction: column;
   background-color: darkslateblue;
+  position: relative;
 }
 
 .play-list-top-wrapper {
@@ -80,4 +81,14 @@
       }
     }
   }
+}
+
+.timeline-bar-line {
+  width: 3px; /* 선의 너비 */
+  z-index: 20;
+  height: 100vh;
+  background-color: black; /* 선의 색상 */
+  position: absolute;
+  top: 15px;
+  left: 10%;
 }
