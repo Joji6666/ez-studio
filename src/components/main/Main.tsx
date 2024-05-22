@@ -1,8 +1,8 @@
 import InstrumentSelector from "../ui/instrumentSelector/InstrumentSelector";
 import Pad from "../ui/pad/Pad";
-import "./main.scss";
-import PlayList from "../ui/playList/PlayList";
 import TopToolbar from "../ui/topToolbar.tsx/TopToolbar";
+import PlayList from "../ui/playList/PlayList";
+import "./main.scss";
 
 const Main = () => {
   return (
@@ -10,7 +10,6 @@ const Main = () => {
       <TopToolbar />
       <InstrumentSelector />
       <Pad />
-
       <PlayList />
     </main>
   );

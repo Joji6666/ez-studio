@@ -1,100 +1,85 @@
+import { useEffect, useState } from "react";
 import "./style/play_list.scss";
 import usePlayList from "./store/usePlayList";
-import useTopToolbar from "../topToolbar.tsx/store/useTopToolbar";
-import { useEffect, useState } from "react";
+
 const PlayList = () => {
-  const {
-    playListTracks,
-    isPlayListPlaying,
-    playListSectionScrollHeight,
-    increaseStep,
-  } = usePlayList();
-  const { bpm } = useTopToolbar();
-  const [xPosition, setXPosition] = useState(0);
+  const { playListTracks } = usePlayList();
+  const [maxWidth, setMaxWidth] = useState(0);
+  const [scrollX, setScrollX] = useState(0);
+  useEffect(() => {
+    // Calculate the maximum width
+
+    let maxPatternWidth = 0;
+    playListTracks.forEach((playListTrack) => {
+      playListTrack.patterns.forEach((pattern) => {
+        const patternWidth =
+          pattern.pattern[0].steps.length * 7 * playListTrack.patterns.length;
+        if (patternWidth > maxPatternWidth) {
+          maxPatternWidth = patternWidth;
+        }
+      });
+    });
+    setMaxWidth(maxPatternWidth + 1000);
+  }, [playListTracks]);
 
   useEffect(() => {
-    let interval = null;
-    if (isPlayListPlaying) {
-      const stepDuration = (60 / bpm) * 1000;
-      interval = setInterval(() => {
-        setXPosition((prevPosition) => (prevPosition + 1) % 200);
-        increaseStep();
-      }, stepDuration);
-    } else {
-      if (interval) {
-        clearInterval(interval);
-      }
+    const measureBarWrapper = document.querySelector(
+      ".play-list-measure-bar-wrapper"
+    );
+
+    // Measure bar 스크롤 이벤트 리스너
+    if (measureBarWrapper) {
+      measureBarWrapper.addEventListener("scroll", function () {
+        setScrollX(measureBarWrapper.scrollLeft);
+      });
     }
-    return () => {
-      if (interval) {
-        clearInterval(interval);
-      }
-    };
-  }, [isPlayListPlaying, bpm]);
+  }, []);
 
   return (
     <section className="play-list-section">
-      <article className="play-list-article">
-        <div className="timeline-wrapper">
-          <div className="timeline-toolbar">toolbar</div>
-          <div className="timeline-bar-wrapper">
-            <div
-              className="timeline-bar"
-              style={{
-                left: `calc(${xPosition * 7}px)`,
-              }}
-            >
-              {/* <div className="timeline-bar-triangle"></div> */}
-              <div className="timeline-bar-line"></div>
+      <div className="play-list-top-wrapper">
+        <div className="play-list-side-toolbar"></div>
+        <div className="play-list-measure-bar-wrapper">
+          <div
+            className="play-list-measure-bar"
+            style={{
+              width: `${maxWidth}px`,
+            }}
+          ></div>
+        </div>
+      </div>
+      <div className="play-list-track-list-wrapper">
+        {playListTracks.map((playListTrack) => (
+          <div
+            className="play-list-track-content-wrapper"
+            key={playListTrack.id}
+          >
+            <div className="play-list-track-content-title">
+              {playListTrack.trackName}
+            </div>
+
+            <div className="play-list-track-content-pattern-wrapper-container">
+              <div className="play-list-track-content-pattern-wrapper">
+                <div
+                  className="play-list-track-content-pattern-content-wrapper"
+                  style={{ right: scrollX }}
+                >
+                  {playListTrack.patterns.map((pattern) => (
+                    <div
+                      key={pattern.id}
+                      className="play-list-track-content-pattern-content"
+                      style={{
+                        minWidth: pattern.pattern[0].steps.length * 7,
+                        maxWidth: pattern.pattern[0].steps.length * 7,
+                      }}
+                    ></div>
+                  ))}
+                </div>
+              </div>
             </div>
           </div>
-        </div>
-
-        <div className="play-list-wrapper">
-          <div
-            className="track-list-wrapper"
-            style={{
-              height:
-                playListSectionScrollHeight > 0
-                  ? `${playListSectionScrollHeight + 60}px`
-                  : "100%",
-            }}
-          >
-            {playListTracks.map((playListTrack) => (
-              <div
-                className="track-title-wrapper"
-                key={playListTrack.trackName}
-              >
-                <span>{playListTrack.trackName}</span>
-              </div>
-            ))}
-          </div>
-          <div
-            className="track-wrapper"
-            style={{
-              height:
-                playListSectionScrollHeight > 0
-                  ? `${playListSectionScrollHeight + 10}px`
-                  : "100%",
-            }}
-          >
-            {playListTracks.map((playListTrack) => (
-              <div className="track-contents-wrapper" key={playListTrack.id}>
-                {playListTrack.patterns.map((pattern) => (
-                  <div
-                    key={pattern.id}
-                    className="track-contents-pattern-wrapper"
-                    style={{
-                      minWidth: pattern.pattern[0].steps.length * 7,
-                      maxWidth: pattern.pattern[0].steps.length * 7,
-                    }}
-                  ></div>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-      </article>
+        ))}
+      </div>
     </section>
   );
 };

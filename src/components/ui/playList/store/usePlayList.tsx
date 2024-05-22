@@ -17,6 +17,7 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
   isPlayListPlaying: false,
   playListSequence: undefined,
   playListSectionScrollHeight: 0,
+  timelinePosition: 0,
   insertTrack: () => {
     const { tracks, selectedTrackId } = usePad.getState();
     const playListTracks = structuredClone(get().playListTracks);
@@ -58,7 +59,7 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
           trackName: selectedTrack.trackName,
           trackId: selectedTrack.id,
         };
-        const playListSection = document.querySelector(".play-list-section");
+        const playListSection = document.querySelector(".play-list-container");
 
         if (playListSection) {
           set(() => ({
@@ -76,7 +77,6 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
     const playListTracks = get().playListTracks;
     const isPlayListPlaying = get().isPlayListPlaying;
     const playListSequence = get().playListSequence;
-    const totalStep = get().totalStep;
     const bpm = useTopToolbar.getState().bpm;
 
     const { loadedInstrument } = useInstrument.getState();
