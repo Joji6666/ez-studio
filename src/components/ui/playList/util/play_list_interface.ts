@@ -6,11 +6,14 @@ export interface IPlayListStore {
   playListTracks: IPlayListTrack[];
   isPlayListPlaying: boolean;
   playListSequence: Tone.Sequence<number> | undefined;
-  playListSectionScrollHeight: number;
   timelinePosition: number;
+  measureBarMaxWidth: number;
+  scrollX: number;
   insertTrack: () => void;
   handleStart: () => void;
   increaseStep: () => void;
+  initPlayList: () => void;
+  handleScroll: (scrollX: number) => void;
 }
 
 export interface IPlayListTrack {

@@ -16,8 +16,9 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
   totalStep: 0,
   isPlayListPlaying: false,
   playListSequence: undefined,
-  playListSectionScrollHeight: 0,
   timelinePosition: 0,
+  measureBarMaxWidth: 0,
+  scrollX: 0,
   insertTrack: () => {
     const { tracks, selectedTrackId } = usePad.getState();
     const playListTracks = structuredClone(get().playListTracks);
@@ -43,35 +44,64 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
       }));
     } else {
       if (selectedTrack) {
-        const newTrackOption: IPlayListTrack = {
-          id: v1(),
-          instrument: { url: "", name: "", group: "" },
-          patterns: [
-            {
-              id: v1(),
-              length: selectedTrack.patterns.length,
-              x: 0,
-              pattern: selectedTrack.patterns,
-              totalDuration,
-            },
-          ],
-          height: 0,
-          trackName: selectedTrack.trackName,
-          trackId: selectedTrack.id,
-        };
-        const playListSection = document.querySelector(".play-list-container");
+        const emptyTrack = playListTracks.find(
+          (playListTrack) => playListTrack.trackId === ""
+        );
 
-        if (playListSection) {
+        if (emptyTrack) {
+          emptyTrack.trackName = selectedTrack.trackName;
+          emptyTrack.trackId = selectedTrack.id;
+          emptyTrack.patterns.push({
+            id: v1(),
+            length: selectedTrack.patterns.length,
+            x: 0,
+            pattern: selectedTrack.patterns,
+            totalDuration,
+          });
+
           set(() => ({
-            playListSectionScrollHeight: playListSection.scrollHeight,
+            playListTracks,
+          }));
+        } else {
+          const newTrackOption: IPlayListTrack = {
+            id: v1(),
+            instrument: { url: "", name: "", group: "" },
+            patterns: [
+              {
+                id: v1(),
+                length: selectedTrack.patterns.length,
+                x: 0,
+                pattern: selectedTrack.patterns,
+                totalDuration,
+              },
+            ],
+            height: 0,
+            trackName: selectedTrack.trackName,
+            trackId: selectedTrack.id,
+          };
+
+          set((state) => ({
+            playListTracks: [...state.playListTracks, newTrackOption],
+            totalStep: state.totalStep + selectedTrack.patterns[0].steps.length,
           }));
         }
-        set((state) => ({
-          playListTracks: [...state.playListTracks, newTrackOption],
-          totalStep: state.totalStep + selectedTrack.patterns[0].steps.length,
-        }));
       }
     }
+
+    let maxPatternWidth = 0;
+    playListTracks.forEach((playListTrack) => {
+      playListTrack.patterns.forEach((pattern) => {
+        const patternWidth =
+          pattern.pattern[0].steps.length * 7 * playListTrack.patterns.length;
+        if (patternWidth > maxPatternWidth) {
+          maxPatternWidth = patternWidth;
+        }
+      });
+    });
+
+    set(() => ({
+      measureBarMaxWidth: maxPatternWidth + 500,
+    }));
   },
   handleStart: async () => {
     const playListTracks = get().playListTracks;
@@ -124,9 +154,32 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
       Tone.Transport.start();
     }
   },
+  handleScroll: (scrollX: number) => {
+    set(() => ({
+      scrollX,
+    }));
+  },
   increaseStep: () => {
     set((state) => ({
       currentStep: state.currentStep + 1,
+    }));
+  },
+  initPlayList: () => {
+    const tracks: IPlayListTrack[] = [];
+    for (let index = 0; index < 19; index++) {
+      const newTrack: IPlayListTrack = {
+        id: v1(),
+        height: 0,
+        trackName: "",
+        patterns: [],
+        trackId: "",
+      };
+
+      tracks.push(newTrack);
+    }
+
+    set(() => ({
+      playListTracks: tracks,
     }));
   },
 }));

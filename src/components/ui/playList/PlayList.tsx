@@ -1,49 +1,53 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import "./style/play_list.scss";
 import usePlayList from "./store/usePlayList";
 import useTopToolbar from "../topToolbar.tsx/store/useTopToolbar";
 
 const PlayList = () => {
-  const { playListTracks, isPlayListPlaying, increaseStep } = usePlayList();
-  const { bpm } = useTopToolbar();
-  const [maxWidth, setMaxWidth] = useState(0);
-  const [scrollX, setScrollX] = useState(0);
+  const {
+    playListTracks,
+    isPlayListPlaying,
+    measureBarMaxWidth,
+    scrollX,
+    initPlayList,
+    increaseStep,
+    handleScroll,
+  } = usePlayList();
+  const { bpm, noteValue } = useTopToolbar();
+
+  const measureBarRef = useRef(null);
+
   const [xPosition, setXPosition] = useState(0);
-  useEffect(() => {
-    // Calculate the maximum width
+  const [measures, setMeasures] = useState(0);
+  const [measureWidth, setMeasureWidth] = useState(0);
 
-    let maxPatternWidth = 0;
-    playListTracks.forEach((playListTrack) => {
-      playListTrack.patterns.forEach((pattern) => {
-        const patternWidth =
-          pattern.pattern[0].steps.length * 7 * playListTrack.patterns.length;
-        if (patternWidth > maxPatternWidth) {
-          maxPatternWidth = patternWidth;
-        }
-      });
-    });
-    setMaxWidth(maxPatternWidth + 1000);
-  }, [playListTracks]);
-
-  useEffect(() => {
-    const measureBarWrapper = document.querySelector(
-      ".play-list-measure-bar-wrapper"
-    );
-
-    // Measure bar 스크롤 이벤트 리스너
-    if (measureBarWrapper) {
-      measureBarWrapper.addEventListener("scroll", function () {
-        setScrollX(measureBarWrapper.scrollLeft);
-      });
-    }
-  }, []);
+  const calculateMeasureWidth = (noteValue: string, baseWidth: number) => {
+    const convertNoteValue = Number(noteValue.replace("n", ""));
+    const widthPerStep = baseWidth * (convertNoteValue / 4);
+    return widthPerStep * convertNoteValue; // 한 마디의 길이 계산
+  };
 
   useEffect(() => {
     let interval = null;
+    const convertNoteValue = Number(noteValue.replace("n", ""));
+    const baseWidth = 7; // 각 스텝의 기준 이동 거리 (7px)
+
+    const measureWidth = calculateMeasureWidth(noteValue, baseWidth);
+
+    const numberOfMeasures = Math.ceil(
+      measureBarMaxWidth > 1500
+        ? measureBarMaxWidth
+        : (measureWidth * 36) / measureWidth
+    );
+
+    setMeasureWidth(measureWidth);
+    setMeasures(numberOfMeasures);
+
     if (isPlayListPlaying) {
-      const stepDuration = (60 / bpm) * 1000;
+      const stepDuration = (60 * 1000) / (bpm * (convertNoteValue / 4)); // 한 스텝의 지속 시간 계산
+      const widthPerStep = baseWidth / (convertNoteValue / 4);
       interval = setInterval(() => {
-        setXPosition((prevPosition) => (prevPosition + 1) % 200);
+        setXPosition((prevPosition) => prevPosition + +widthPerStep); // xPosition을 계속 증가
         increaseStep();
       }, stepDuration);
     } else {
@@ -56,25 +60,61 @@ const PlayList = () => {
         clearInterval(interval);
       }
     };
-  }, [isPlayListPlaying, bpm]);
+  }, [isPlayListPlaying, bpm, noteValue]);
+
+  useEffect(() => {
+    const measureBarWrapper = document.querySelector(
+      ".play-list-measure-bar-wrapper"
+    );
+
+    // Measure bar 스크롤 이벤트 리스너
+    if (measureBarWrapper) {
+      measureBarWrapper.addEventListener("scroll", function () {
+        handleScroll(measureBarWrapper.scrollLeft);
+      });
+    }
+
+    initPlayList();
+  }, []);
 
   return (
     <section className="play-list-section">
       <div
         className="timeline-bar-line"
         style={{
-          left: `calc(${xPosition * 7}px + 10%)`,
+          left: `calc(${xPosition}px + 10%)`,
         }}
       ></div>
       <div className="play-list-top-wrapper">
         <div className="play-list-side-toolbar"></div>
         <div className="play-list-measure-bar-wrapper">
           <div
+            ref={measureBarRef}
             className="play-list-measure-bar"
             style={{
-              width: `${maxWidth}px`,
+              width: `${
+                measureBarMaxWidth > measureWidth * 36
+                  ? measureBarMaxWidth
+                  : measureWidth * 36
+              }px`,
+              display: "flex",
             }}
-          ></div>
+          >
+            {[...Array(measures)].map((_, index) => (
+              <div
+                key={index}
+                className="measure"
+                style={{
+                  minWidth: `${measureWidth}px`,
+                  maxWidth: `${measureWidth}px`,
+                  borderRight: "1px solid black",
+                  height: "100%",
+                }}
+              >
+                <p style={{ width: "100%", height: "100%" }}>{index}</p>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
       <div className="play-list-track-list-wrapper">
@@ -84,7 +124,9 @@ const PlayList = () => {
             key={playListTrack.id}
           >
             <div className="play-list-track-content-title">
-              {playListTrack.trackName}
+              {playListTrack.trackName !== ""
+                ? playListTrack.trackName
+                : "empty"}
             </div>
 
             <div className="play-list-track-content-pattern-wrapper-container">
@@ -95,13 +137,58 @@ const PlayList = () => {
                 >
                   {playListTrack.patterns.map((pattern) => (
                     <div
+                      id={`pattern-${pattern.id}`}
                       key={pattern.id}
                       className="play-list-track-content-pattern-content"
                       style={{
                         minWidth: pattern.pattern[0].steps.length * 7,
                         maxWidth: pattern.pattern[0].steps.length * 7,
+                        borderRight: "1px solid black",
                       }}
-                    ></div>
+                    >
+                      <div
+                        style={{
+                          width: "100%",
+                          height: "100%",
+                          display: "flex",
+                          flexDirection: "column",
+                        }}
+                      >
+                        {pattern.pattern.map((childPattern) => (
+                          <div
+                            key={childPattern.id}
+                            style={{
+                              width: "100%",
+                              height: "100%",
+                              display: "flex",
+                            }}
+                          >
+                            {childPattern.steps.map((step) => (
+                              <div key={step.id}>
+                                {step.isChecked ? (
+                                  <p
+                                    style={{
+                                      backgroundColor: "white",
+                                      width: "7px",
+                                      height: "7px",
+                                    }}
+                                  ></p>
+                                ) : (
+                                  <p
+                                    style={{
+                                      backgroundColor: "white",
+                                      width: "7px",
+                                      height: "7px",
+                                      visibility: "hidden",
+                                    }}
+                                  ></p>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   ))}
                 </div>
               </div>
