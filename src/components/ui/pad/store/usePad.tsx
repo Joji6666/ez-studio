@@ -201,7 +201,6 @@ const usePad = create<IPadStore>((set, get) => ({
 
       const newSequence = new Tone.Sequence(
         (time, step) => {
-          console.log(time, "time", step, "step@");
           tracks.forEach((track) => {
             if (selectedTrackId === track.id) {
               track.patterns.forEach((pattern) => {

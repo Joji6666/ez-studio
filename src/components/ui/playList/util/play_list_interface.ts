@@ -14,6 +14,11 @@ export interface IPlayListStore {
   selectedPattern: IPattern | null;
   selectedTrackId: string;
   checkedSteps: ICheckedStep[];
+  timelineAnimationId: number | null;
+  measureWidth: number;
+  measures: number;
+
+  // functions
   insertTrack: () => void;
   handleStart: () => void;
   increaseStep: () => void;
@@ -26,6 +31,9 @@ export interface IPlayListStore {
     trackId: string,
     pattern: IPattern
   ) => void;
+
+  calculateMeasureWidth: (noteValue: string, baseWidth: number) => number;
+  initMeasure: () => void;
 }
 
 export interface IPlayListTrack {

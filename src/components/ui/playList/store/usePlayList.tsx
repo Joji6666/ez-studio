@@ -10,6 +10,9 @@ import { v1 } from "uuid";
 import { calculateSequenceDuration } from "../../../../lib/common_function";
 import usePad from "../../pad/store/usePad";
 import useTopToolbar from "../../topToolbar.tsx/store/useTopToolbar";
+import useInstrument from "../../instrumentSelector/store/useInstrument";
+
+let xPo = 0;
 
 const usePlayList = create<IPlayListStore>((set, get) => ({
   // values
@@ -27,6 +30,9 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
   selectedPattern: null,
   selectedTrackId: "",
   checkedSteps: [],
+  timelineAnimationId: null,
+  measureWidth: 0,
+  measures: 0,
 
   // fuctions
 
@@ -117,27 +123,92 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
   handleStart: async () => {
     const isPlayListPlaying = get().isPlayListPlaying;
     const playListSequence = get().playListSequence;
+    const checkedSteps = get().checkedSteps;
+    const playListTracks = get().playListTracks;
     const bpm = useTopToolbar.getState().bpm;
-
+    const loadedInstrument = useInstrument.getState().loadedInstrument;
+    const timelineAnimationId = get().timelineAnimationId;
     await Tone.start(); // Tone 오디오 컨텍스트를 활성화
     if (isPlayListPlaying) {
-      set(() => ({
-        isPlayListPlaying: false,
-      }));
-
       if (playListSequence) {
         playListSequence.dispose(); // 컴포넌트 언마운트 시 시퀀스 해제
       }
 
+      if (timelineAnimationId) {
+        cancelAnimationFrame(timelineAnimationId);
+      }
+
+      set(() => ({
+        isPlayListPlaying: false,
+        timelineAnimationId: null,
+      }));
       Tone.Transport.stop();
     } else {
       Tone.Transport.bpm.value = bpm; // BPM 설정
+      const analyzer = new Tone.Analyser("fft", 32);
+
+      const checkedStepsRects = checkedSteps.map((step) => step.rect);
+
+      const stepDuration = (60 * 1000) / bpm; // 한 스텝의 지속 시간 계산 (ms)
+      const baseWidth = 7; // 각 스텝의 기준 이동 거리 (px)
+      let lastTime = 0; // 마지막 프레임의 시간을 저장할 변수
+      const playedStep: { [key: string]: string } = {};
+      const render = (time: number) => {
+        if (!lastTime) lastTime = time; // 처음 프레임의 시간을 저장
+        const deltaTime = time - lastTime; // 두 프레임 간의 시간 차이 계산
+        lastTime = time; // 현재 프레임의 시간을 lastTime으로 업데이트
+
+        xPo += ((baseWidth * deltaTime) / stepDuration) * 2;
+
+        const timelinebarElement = document.querySelector(".timeline-bar-line");
+        if (timelinebarElement) {
+          const element = timelinebarElement as HTMLElement;
+          element.style.transform = `translateX(${xPo}px)`;
+
+          const timelineBarRect = element.getBoundingClientRect();
+
+          checkedStepsRects.forEach((rect, index) => {
+            if (
+              Math.round(timelineBarRect.right) === Math.round(rect.left) &&
+              Math.round(rect.right) === Math.round(timelineBarRect.left + 9)
+            ) {
+              const step = checkedSteps[index];
+              if (
+                step.trackIndex &&
+                step.patternIndex &&
+                step.childPatternIndex
+              ) {
+                if (
+                  step.stepId &&
+                  playedStep[step.stepId] !== step.patternIndex
+                ) {
+                  const instrument =
+                    loadedInstrument[
+                      playListTracks[Number(step.trackIndex)].patterns[
+                        Number(step.patternIndex)
+                      ].pattern[Number(step.childPatternIndex)].instrument.url
+                    ];
+                  instrument.connect(analyzer);
+                  analyzer.toDestination();
+                  instrument.start();
+                  playedStep[step.stepId] = step.patternIndex;
+                }
+              }
+            }
+          });
+        }
+        set(() => ({
+          timelineAnimationId: requestAnimationFrame(render),
+        }));
+      };
+
+      requestAnimationFrame(render);
 
       set(() => ({
         isPlayListPlaying: true,
         // playListSequence: newSequence,
       }));
-
+      useTopToolbar.setState({ analyzer });
       Tone.Transport.start();
     }
   },
@@ -279,6 +350,29 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
     set(() => ({
       playListTracks: tracks,
     }));
+  },
+  initMeasure: () => {
+    const noteValue = useTopToolbar.getState().noteValue;
+    const measureBarMaxWidth = get().measureBarMaxWidth;
+    const calculateMeasureWidth = get().calculateMeasureWidth;
+    const measureWidth = calculateMeasureWidth(noteValue, 7);
+
+    const numberOfMeasures = Math.ceil(
+      measureBarMaxWidth > 1500
+        ? measureBarMaxWidth
+        : (measureWidth * 36) / measureWidth
+    );
+
+    set({
+      measureWidth,
+      measures: numberOfMeasures,
+    });
+  },
+
+  calculateMeasureWidth: (noteValue: string, baseWidth: number) => {
+    const convertNoteValue = Number(noteValue.replace("n", ""));
+    const widthPerStep = baseWidth * (convertNoteValue / 4);
+    return widthPerStep * convertNoteValue; // 한 마디의 길이 계산
   },
 }));
 

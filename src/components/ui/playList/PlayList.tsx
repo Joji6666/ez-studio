@@ -1,44 +1,22 @@
-import { useEffect, useState, useRef } from "react";
-import * as Tone from "tone";
+import { useEffect } from "react";
 import "./style/play_list.scss";
 import usePlayList from "./store/usePlayList";
-import useTopToolbar from "../topToolbar.tsx/store/useTopToolbar";
-import useInstrument from "../instrumentSelector/store/useInstrument";
-import { ICheckedStep } from "./util/play_list_interface";
-
-let xPo = 0;
+import type { ICheckedStep } from "./util/play_list_interface";
 
 const PlayList = () => {
   const {
     playListTracks,
-    isPlayListPlaying,
     measureBarMaxWidth,
     scrollX,
     isDragging,
-    checkedSteps,
+    measureWidth,
+    measures,
     initPlayList,
+    initMeasure,
     handleMouseDown,
     handleMouseUp,
     handleMouseMove,
   } = usePlayList();
-  const { bpm, noteValue } = useTopToolbar();
-  const { loadedInstrument } = useInstrument();
-
-  const measureBarRef = useRef(null);
-  const timelineBarRef = useRef<HTMLDivElement>(null);
-  const animationFrameRef = useRef<number | null>(null);
-  const [measures, setMeasures] = useState(0);
-  const [measureWidth, setMeasureWidth] = useState(0);
-
-  const calculateMeasureWidth = (noteValue: string, baseWidth: number) => {
-    const convertNoteValue = Number(noteValue.replace("n", ""));
-    const widthPerStep = baseWidth * (convertNoteValue / 4);
-    return widthPerStep * convertNoteValue; // 한 마디의 길이 계산
-  };
-
-  useEffect(() => {
-    initPlayList();
-  }, []);
 
   useEffect(() => {
     if (playListTracks.length > 0 && !isDragging) {
@@ -71,90 +49,17 @@ const PlayList = () => {
   }, [playListTracks]);
 
   useEffect(() => {
-    if (isPlayListPlaying) {
-      const checkedStepsRects = checkedSteps.map((step) => step.rect);
-
-      const stepDuration = (60 * 1000) / bpm; // 한 스텝의 지속 시간 계산 (ms)
-      const baseWidth = 7; // 각 스텝의 기준 이동 거리 (px)
-      let lastTime = 0; // 마지막 프레임의 시간을 저장할 변수
-      const playedStep: { [key: string]: string } = {};
-      const render = (time: number) => {
-        if (!lastTime) lastTime = time; // 처음 프레임의 시간을 저장
-        const deltaTime = time - lastTime; // 두 프레임 간의 시간 차이 계산
-        lastTime = time; // 현재 프레임의 시간을 lastTime으로 업데이트
-
-        xPo += ((baseWidth * deltaTime) / stepDuration) * 2;
-
-        const timelinebarElement = document.querySelector(".timeline-bar-line");
-        if (timelinebarElement) {
-          const element = timelinebarElement as HTMLElement;
-          element.style.transform = `translateX(${xPo}px)`;
-
-          const timelineBarRect = element.getBoundingClientRect();
-
-          checkedStepsRects.forEach((rect, index) => {
-            if (
-              Math.round(timelineBarRect.right) === Math.round(rect.left) &&
-              Math.round(rect.right) === Math.round(timelineBarRect.left + 9)
-            ) {
-              const step = checkedSteps[index];
-              if (
-                step.trackIndex &&
-                step.patternIndex &&
-                step.childPatternIndex
-              ) {
-                if (
-                  step.stepId &&
-                  playedStep[step.stepId] !== step.patternIndex
-                ) {
-                  const instrument =
-                    loadedInstrument[
-                      playListTracks[Number(step.trackIndex)].patterns[
-                        Number(step.patternIndex)
-                      ].pattern[Number(step.childPatternIndex)].instrument.url
-                    ];
-                  instrument.start();
-                  playedStep[step.stepId] = step.patternIndex;
-                }
-              }
-            }
-          });
-        }
-        animationFrameRef.current = requestAnimationFrame(render);
-      };
-
-      Tone.Transport.start();
-
-      requestAnimationFrame(render);
-    } else {
-      if (animationFrameRef.current) {
-        cancelAnimationFrame(animationFrameRef.current);
-      }
-      Tone.Transport.stop();
-    }
-  }, [isPlayListPlaying, bpm, noteValue, checkedSteps]);
-
-  useEffect(() => {
-    const measureWidth = calculateMeasureWidth(noteValue, 7);
-
-    const numberOfMeasures = Math.ceil(
-      measureBarMaxWidth > 1500
-        ? measureBarMaxWidth
-        : (measureWidth * 36) / measureWidth
-    );
-
-    setMeasureWidth(measureWidth);
-    setMeasures(numberOfMeasures);
-  }, [noteValue, measureBarMaxWidth]);
+    initPlayList();
+    initMeasure();
+  }, []);
 
   return (
     <section className="play-list-section">
-      <div ref={timelineBarRef} className="timeline-bar-line"></div>
+      <div className="timeline-bar-line"></div>
       <div className="play-list-top-wrapper">
         <div className="play-list-side-toolbar"></div>
         <div className="play-list-measure-bar-wrapper">
           <div
-            ref={measureBarRef}
             className="play-list-measure-bar"
             style={{
               width: `${
@@ -162,7 +67,6 @@ const PlayList = () => {
                   ? measureBarMaxWidth
                   : measureWidth * 36
               }px`,
-              display: "flex",
             }}
           >
             {[...Array(measures)].map((_, index) => (
@@ -172,8 +76,6 @@ const PlayList = () => {
                 style={{
                   minWidth: `${measureWidth}px`,
                   maxWidth: `${measureWidth}px`,
-                  borderRight: "1px solid black",
-                  height: "100%",
                 }}
               >
                 <p style={{ width: "100%", height: "100%" }}>{index}</p>
@@ -220,23 +122,12 @@ const PlayList = () => {
                         left: `${pattern.x}px`,
                       }}
                     >
-                      <div
-                        style={{
-                          width: "100%",
-                          height: "100%",
-                          display: "flex",
-                          flexDirection: "column",
-                        }}
-                      >
+                      <div className="play-list-track-content-child-pattern-content-wrapper">
                         {pattern.pattern.map(
                           (childPattern, childPatternIndex) => (
                             <div
+                              className="play-list-track-content-child-pattern-steps-wrapper"
                               key={childPattern.id}
-                              style={{
-                                width: "100%",
-                                height: "100%",
-                                display: "flex",
-                              }}
                             >
                               {childPattern.steps.map((step) => (
                                 <div key={step.id}>
@@ -248,11 +139,6 @@ const PlayList = () => {
                                         childPatternIndex
                                       }
                                       data-step-id={step.id}
-                                      style={{
-                                        backgroundColor: "white",
-                                        width: "7px",
-                                        height: "7px",
-                                      }}
                                       className="pattern-step"
                                     ></p>
                                   ) : (

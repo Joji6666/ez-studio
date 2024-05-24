@@ -1,12 +1,13 @@
 import { useRef, useEffect } from "react";
 import usePad from "../pad/store/usePad";
 import useTopToolbar from "./store/useTopToolbar";
+import usePlayList from "../playList/store/usePlayList";
 
 let animationFrameId: number = 0;
 
 const AudioVisualizer = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
-
+  const { isPlayListPlaying } = usePlayList();
   const { isPadPlaying } = usePad();
   const { analyzer } = useTopToolbar();
 
@@ -31,7 +32,7 @@ const AudioVisualizer = () => {
   };
 
   useEffect(() => {
-    if (isPadPlaying) {
+    if (isPadPlaying || isPlayListPlaying) {
       draw();
     } else {
       cancelAnimationFrame(animationFrameId);
@@ -43,7 +44,7 @@ const AudioVisualizer = () => {
         }
       }
     }
-  }, [isPadPlaying]);
+  }, [isPadPlaying, isPlayListPlaying]);
 
   return <canvas ref={canvasRef} width="100" height="100" />;
 };

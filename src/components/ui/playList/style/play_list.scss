@@ -30,6 +30,12 @@
       height: 70px;
       background-color: red;
       transform: rotateX(180deg);
+      display: flex;
+
+      .measure {
+        border-right: 1px solid black;
+        height: 100%;
+      }
     }
   }
 }
@@ -79,6 +85,24 @@
             background-color: blueviolet;
             border-right: 1px solid black;
             position: relative;
+
+            .play-list-track-content-child-pattern-content-wrapper {
+              width: 100%;
+              height: 100%;
+              display: flex;
+              flex-direction: column;
+
+              .play-list-track-content-child-pattern-steps-wrapper {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                .pattern-step {
+                  background-color: white;
+                  width: 7px;
+                  height: 7px;
+                }
+              }
+            }
           }
         }
       }
