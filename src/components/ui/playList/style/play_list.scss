@@ -77,6 +77,8 @@
           .play-list-track-content-pattern-content {
             height: 100%;
             background-color: blueviolet;
+            border-right: 1px solid black;
+            position: relative;
           }
         }
       }
@@ -85,7 +87,7 @@
 }
 
 .timeline-bar-line {
-  width: 3px; /* 선의 너비 */
+  width: 2px; /* 선의 너비 */
   z-index: 20;
   height: 100vh;
   background-color: black; /* 선의 색상 */

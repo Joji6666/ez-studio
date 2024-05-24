@@ -9,11 +9,22 @@ export interface IPlayListStore {
   timelinePosition: number;
   measureBarMaxWidth: number;
   scrollX: number;
+  isDragging: boolean;
+  dragStartX: number;
+  selectedPattern: IPattern | null;
+  selectedTrackId: string;
   insertTrack: () => void;
   handleStart: () => void;
   increaseStep: () => void;
   initPlayList: () => void;
   handleScroll: (scrollX: number) => void;
+  handleMouseMove: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;
+  handleMouseUp: () => void;
+  handleMouseDown: (
+    e: React.MouseEvent<HTMLElement, MouseEvent>,
+    trackId: string,
+    pattern: IPattern
+  ) => void;
 }
 
 export interface IPlayListTrack {

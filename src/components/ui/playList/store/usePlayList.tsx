@@ -3,6 +3,7 @@ import * as Tone from "tone";
 import type {
   IPlayListTrack,
   IPlayListStore,
+  IPattern,
 } from "../util/play_list_interface";
 import { v1 } from "uuid";
 import { calculateSequenceDuration } from "../../../../lib/common_function";
@@ -19,6 +20,10 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
   timelinePosition: 0,
   measureBarMaxWidth: 0,
   scrollX: 0,
+  isDragging: false,
+  dragStartX: 0,
+  selectedPattern: null,
+  selectedTrackId: "",
   insertTrack: () => {
     const { tracks, selectedTrackId } = usePad.getState();
     const playListTracks = structuredClone(get().playListTracks);
@@ -124,31 +129,31 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
     } else {
       Tone.Transport.bpm.value = bpm; // BPM 설정
 
-      const newSequence = new Tone.Sequence(
-        (time, step) => {
-          playListTracks.forEach((playListTrack) => {
-            playListTrack.patterns.forEach((pattern) => {
-              pattern.pattern.forEach((childPattern) => {
-                const currentStep = childPattern.steps[step % 16];
+      //   const newSequence = new Tone.Sequence(
+      //     (time, step) => {
+      //       playListTracks.forEach((playListTrack) => {
+      //         playListTrack.patterns.forEach((pattern) => {
+      //           pattern.pattern.forEach((childPattern) => {
+      //             const currentStep = childPattern.steps[step % 16];
 
-                if (currentStep.isChecked) {
-                  const instrument =
-                    loadedInstrument[childPattern.instrument.url];
-                  instrument.start(time); // 오디오 재생
-                }
-              });
-            });
-          });
-        },
-        Array.from({ length: 16 }, (_, i) => i),
-        "8n"
-      );
+      //             if (currentStep.isChecked) {
+      //               const instrument =
+      //                 loadedInstrument[childPattern.instrument.url];
+      //               instrument.start(time); // 오디오 재생
+      //             }
+      //           });
+      //         });
+      //       });
+      //     },
+      //     Array.from({ length: 16 }, (_, i) => i),
+      //     "8n"
+      //   );
 
-      newSequence.start(0);
+      //   newSequence.start(0);
 
       set(() => ({
         isPlayListPlaying: true,
-        playListSequence: newSequence,
+        // playListSequence: newSequence,
       }));
 
       Tone.Transport.start();
@@ -157,6 +162,79 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
   handleScroll: (scrollX: number) => {
     set(() => ({
       scrollX,
+    }));
+  },
+  handleMouseDown: (
+    e: React.MouseEvent<HTMLElement, MouseEvent>,
+    trackId: string,
+    pattern: IPattern
+  ) => {
+    set(() => ({
+      isDragging: true,
+      dragStartX: e.clientX - pattern.x,
+      selectedTrackId: trackId,
+      selectedPattern: pattern,
+    }));
+  },
+
+  handleMouseMove: (e: React.MouseEvent<HTMLElement, MouseEvent>) => {
+    const isDragging = get().isDragging;
+
+    if (isDragging) {
+      const dragStartX = get().dragStartX;
+      const selectedPattern = get().selectedPattern;
+      const selectedTrackId = get().selectedTrackId;
+      const playListTracks = structuredClone(get().playListTracks);
+
+      const targetTrack = playListTracks.find(
+        (playListTrack) => playListTrack.id === selectedTrackId
+      );
+      const newElementX = e.clientX - dragStartX; // 새로운 x 위치 계산
+
+      const playListTrackContentWrapper = document.querySelector(
+        ".play-list-track-content-pattern-wrapper-container"
+      );
+
+      if (targetTrack && playListTrackContentWrapper && selectedPattern) {
+        const targetPatternElement = document.querySelector(
+          `#pattern-${selectedPattern.id}`
+        );
+
+        const targetPattern = targetTrack.patterns.find(
+          (pattern) => pattern.id === selectedPattern.id
+        );
+
+        if (targetPattern) {
+          if (targetPatternElement) {
+            const targetPatternElementClientRectLeft =
+              targetPatternElement.getBoundingClientRect().left;
+            const playListTrackContentWrapperClientRectLeft =
+              playListTrackContentWrapper.getBoundingClientRect().left;
+
+            const elementGap =
+              targetPatternElementClientRectLeft -
+              playListTrackContentWrapperClientRectLeft;
+
+            if (elementGap >= 0) {
+              targetPattern.x = newElementX;
+            }
+
+            if (elementGap < 0) {
+              targetPattern.x = targetPattern.x + 1;
+            }
+          }
+        }
+      }
+
+      set(() => ({
+        playListTracks,
+      }));
+    }
+  },
+
+  handleMouseUp: () => {
+    set(() => ({
+      isDragging: false,
     }));
   },
   increaseStep: () => {

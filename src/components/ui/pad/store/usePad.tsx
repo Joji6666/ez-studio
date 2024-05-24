@@ -174,6 +174,7 @@ const usePad = create<IPadStore>((set, get) => ({
     const loadedInstrument = useInstrument.getState().loadedInstrument;
     const bpm = useTopToolbar.getState().bpm;
     const analyzer = useTopToolbar.getState().analyzer;
+
     await Tone.start(); // Tone 오디오 컨텍스트를 활성화
     if (isPadPlaying) {
       set(() => ({
@@ -200,6 +201,7 @@ const usePad = create<IPadStore>((set, get) => ({
 
       const newSequence = new Tone.Sequence(
         (time, step) => {
+          console.log(time, "time", step, "step@");
           tracks.forEach((track) => {
             if (selectedTrackId === track.id) {
               track.patterns.forEach((pattern) => {
