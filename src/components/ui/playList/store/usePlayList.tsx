@@ -4,14 +4,16 @@ import type {
   IPlayListTrack,
   IPlayListStore,
   IPattern,
+  ICheckedStep,
 } from "../util/play_list_interface";
 import { v1 } from "uuid";
 import { calculateSequenceDuration } from "../../../../lib/common_function";
 import usePad from "../../pad/store/usePad";
-import useInstrument from "../../instrumentSelector/store/useInstrument";
 import useTopToolbar from "../../topToolbar.tsx/store/useTopToolbar";
 
 const usePlayList = create<IPlayListStore>((set, get) => ({
+  // values
+
   currentStep: 0,
   playListTracks: [],
   totalStep: 0,
@@ -24,6 +26,10 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
   dragStartX: 0,
   selectedPattern: null,
   selectedTrackId: "",
+  checkedSteps: [],
+
+  // fuctions
+
   insertTrack: () => {
     const { tracks, selectedTrackId } = usePad.getState();
     const playListTracks = structuredClone(get().playListTracks);
@@ -109,12 +115,10 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
     }));
   },
   handleStart: async () => {
-    const playListTracks = get().playListTracks;
     const isPlayListPlaying = get().isPlayListPlaying;
     const playListSequence = get().playListSequence;
     const bpm = useTopToolbar.getState().bpm;
 
-    const { loadedInstrument } = useInstrument.getState();
     await Tone.start(); // Tone 오디오 컨텍스트를 활성화
     if (isPlayListPlaying) {
       set(() => ({
@@ -128,28 +132,6 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
       Tone.Transport.stop();
     } else {
       Tone.Transport.bpm.value = bpm; // BPM 설정
-
-      //   const newSequence = new Tone.Sequence(
-      //     (time, step) => {
-      //       playListTracks.forEach((playListTrack) => {
-      //         playListTrack.patterns.forEach((pattern) => {
-      //           pattern.pattern.forEach((childPattern) => {
-      //             const currentStep = childPattern.steps[step % 16];
-
-      //             if (currentStep.isChecked) {
-      //               const instrument =
-      //                 loadedInstrument[childPattern.instrument.url];
-      //               instrument.start(time); // 오디오 재생
-      //             }
-      //           });
-      //         });
-      //       });
-      //     },
-      //     Array.from({ length: 16 }, (_, i) => i),
-      //     "8n"
-      //   );
-
-      //   newSequence.start(0);
 
       set(() => ({
         isPlayListPlaying: true,
@@ -233,6 +215,31 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
   },
 
   handleMouseUp: () => {
+    const checkedSteps = document.querySelectorAll(".pattern-step");
+
+    if (checkedSteps.length > 0) {
+      const newCheckedSteps: ICheckedStep[] = [];
+      checkedSteps.forEach((stepEl) => {
+        const element = stepEl as HTMLElement;
+
+        const { childPatternIndex, patternIndex, stepId, trackIndex } =
+          element.dataset;
+
+        const newCheckedStepOption: ICheckedStep = {
+          childPatternIndex,
+          patternIndex,
+          stepId,
+          trackIndex,
+          rect: element.getBoundingClientRect(),
+        };
+
+        newCheckedSteps.push(newCheckedStepOption);
+      });
+      set(() => ({
+        checkedSteps: newCheckedSteps,
+      }));
+    }
+
     set(() => ({
       isDragging: false,
     }));
@@ -243,6 +250,19 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
     }));
   },
   initPlayList: () => {
+    const handleScroll = get().handleScroll;
+
+    const measureBarWrapper = document.querySelector(
+      ".play-list-measure-bar-wrapper"
+    );
+
+    // Measure bar 스크롤 이벤트 리스너
+    if (measureBarWrapper) {
+      measureBarWrapper.addEventListener("scroll", function () {
+        handleScroll(measureBarWrapper.scrollLeft);
+      });
+    }
+
     const tracks: IPlayListTrack[] = [];
     for (let index = 0; index < 19; index++) {
       const newTrack: IPlayListTrack = {

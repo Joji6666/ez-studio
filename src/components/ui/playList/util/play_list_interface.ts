@@ -13,6 +13,7 @@ export interface IPlayListStore {
   dragStartX: number;
   selectedPattern: IPattern | null;
   selectedTrackId: string;
+  checkedSteps: ICheckedStep[];
   insertTrack: () => void;
   handleStart: () => void;
   increaseStep: () => void;
@@ -53,4 +54,12 @@ export interface IPlayListPattern {
 export interface IPlayListStep {
   id: string;
   isChecked: boolean;
+}
+
+export interface ICheckedStep {
+  childPatternIndex: string | undefined;
+  patternIndex: string | undefined;
+  stepId: string | undefined;
+  trackIndex: string | undefined;
+  rect: DOMRect;
 }

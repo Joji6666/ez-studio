@@ -4,7 +4,7 @@ import "./style/play_list.scss";
 import usePlayList from "./store/usePlayList";
 import useTopToolbar from "../topToolbar.tsx/store/useTopToolbar";
 import useInstrument from "../instrumentSelector/store/useInstrument";
-import { IInstrument } from "../instrumentSelector/util/instrument_selector_interface";
+import { ICheckedStep } from "./util/play_list_interface";
 
 let xPo = 0;
 
@@ -14,8 +14,9 @@ const PlayList = () => {
     isPlayListPlaying,
     measureBarMaxWidth,
     scrollX,
+    isDragging,
+    checkedSteps,
     initPlayList,
-    handleScroll,
     handleMouseDown,
     handleMouseUp,
     handleMouseMove,
@@ -28,7 +29,6 @@ const PlayList = () => {
   const animationFrameRef = useRef<number | null>(null);
   const [measures, setMeasures] = useState(0);
   const [measureWidth, setMeasureWidth] = useState(0);
-  const [checkedSteps, setCheckedSteps] = useState([]);
 
   const calculateMeasureWidth = (noteValue: string, baseWidth: number) => {
     const convertNoteValue = Number(noteValue.replace("n", ""));
@@ -37,32 +37,22 @@ const PlayList = () => {
   };
 
   useEffect(() => {
-    const measureBarWrapper = document.querySelector(
-      ".play-list-measure-bar-wrapper"
-    );
-
-    // Measure bar 스크롤 이벤트 리스너
-    if (measureBarWrapper) {
-      measureBarWrapper.addEventListener("scroll", function () {
-        handleScroll(measureBarWrapper.scrollLeft);
-      });
-    }
-
     initPlayList();
   }, []);
 
   useEffect(() => {
-    if (playListTracks.length > 0) {
+    if (playListTracks.length > 0 && !isDragging) {
       const checkedSteps = document.querySelectorAll(".pattern-step");
 
       if (checkedSteps.length > 0) {
-        const newCheckedSteps = [];
+        const newCheckedSteps: ICheckedStep[] = [];
         checkedSteps.forEach((stepEl) => {
           const element = stepEl as HTMLElement;
+
           const { childPatternIndex, patternIndex, stepId, trackIndex } =
             element.dataset;
 
-          const newCheckedStepOption = {
+          const newCheckedStepOption: ICheckedStep = {
             childPatternIndex,
             patternIndex,
             stepId,
@@ -73,7 +63,9 @@ const PlayList = () => {
           newCheckedSteps.push(newCheckedStepOption);
         });
 
-        setCheckedSteps(newCheckedSteps);
+        usePlayList.setState({
+          checkedSteps: newCheckedSteps,
+        });
       }
     }
   }, [playListTracks]);
@@ -85,7 +77,7 @@ const PlayList = () => {
       const stepDuration = (60 * 1000) / bpm; // 한 스텝의 지속 시간 계산 (ms)
       const baseWidth = 7; // 각 스텝의 기준 이동 거리 (px)
       let lastTime = 0; // 마지막 프레임의 시간을 저장할 변수
-      const playedStep = [];
+      const playedStep: { [key: string]: string } = {};
       const render = (time: number) => {
         if (!lastTime) lastTime = time; // 처음 프레임의 시간을 저장
         const deltaTime = time - lastTime; // 두 프레임 간의 시간 차이 계산
@@ -106,16 +98,25 @@ const PlayList = () => {
               Math.round(rect.right) === Math.round(timelineBarRect.left + 9)
             ) {
               const step = checkedSteps[index];
-
-              if (!playedStep.includes(step.stepId)) {
-                const instrument =
-                  loadedInstrument[
-                    playListTracks[step.trackIndex].patterns[step.patternIndex]
-                      .pattern[step.childPatternIndex].instrument.url
-                  ];
-                instrument.start();
+              if (
+                step.trackIndex &&
+                step.patternIndex &&
+                step.childPatternIndex
+              ) {
+                if (
+                  step.stepId &&
+                  playedStep[step.stepId] !== step.patternIndex
+                ) {
+                  const instrument =
+                    loadedInstrument[
+                      playListTracks[Number(step.trackIndex)].patterns[
+                        Number(step.patternIndex)
+                      ].pattern[Number(step.childPatternIndex)].instrument.url
+                    ];
+                  instrument.start();
+                  playedStep[step.stepId] = step.patternIndex;
+                }
               }
-              playedStep.push(step.stepId);
             }
           });
         }
@@ -131,7 +132,7 @@ const PlayList = () => {
       }
       Tone.Transport.stop();
     }
-  }, [isPlayListPlaying, bpm]);
+  }, [isPlayListPlaying, bpm, noteValue, checkedSteps]);
 
   useEffect(() => {
     const measureWidth = calculateMeasureWidth(noteValue, 7);
@@ -144,17 +145,11 @@ const PlayList = () => {
 
     setMeasureWidth(measureWidth);
     setMeasures(numberOfMeasures);
-  }, [noteValue]);
+  }, [noteValue, measureBarMaxWidth]);
 
   return (
     <section className="play-list-section">
-      <div
-        ref={timelineBarRef}
-        className="timeline-bar-line"
-        // style={{
-        //   left: `calc(${xPosition}px + 10%)`,
-        // }}
-      ></div>
+      <div ref={timelineBarRef} className="timeline-bar-line"></div>
       <div className="play-list-top-wrapper">
         <div className="play-list-side-toolbar"></div>
         <div className="play-list-measure-bar-wrapper">
