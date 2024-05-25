@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import "./style/play_list.scss";
 import usePlayList from "./store/usePlayList";
 import type { ICheckedStep } from "./util/play_list_interface";
+import type { IInstrument } from "../instrumentSelector/util/instrument_selector_interface";
 
 const PlayList = () => {
   const {
@@ -27,8 +28,23 @@ const PlayList = () => {
         checkedSteps.forEach((stepEl) => {
           const element = stepEl as HTMLElement;
 
-          const { childPatternIndex, patternIndex, stepId, trackIndex } =
-            element.dataset;
+          const {
+            childPatternIndex,
+            patternIndex,
+            stepId,
+            trackIndex,
+            instrument,
+          } = element.dataset;
+
+          let newInstrument: IInstrument = {
+            url: "",
+            name: "",
+            group: "",
+          };
+
+          if (instrument) {
+            newInstrument = JSON.parse(instrument);
+          }
 
           const newCheckedStepOption: ICheckedStep = {
             childPatternIndex,
@@ -36,6 +52,7 @@ const PlayList = () => {
             stepId,
             trackIndex,
             rect: element.getBoundingClientRect(),
+            instrument: newInstrument,
           };
 
           newCheckedSteps.push(newCheckedStepOption);
@@ -138,6 +155,9 @@ const PlayList = () => {
                                       data-child-pattern-index={
                                         childPatternIndex
                                       }
+                                      data-instrument={JSON.stringify(
+                                        childPattern.instrument
+                                      )}
                                       data-step-id={step.id}
                                       className="pattern-step"
                                     ></p>

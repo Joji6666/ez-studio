@@ -17,6 +17,7 @@ export interface IPlayListStore {
   timelineAnimationId: number | null;
   measureWidth: number;
   measures: number;
+  effectors: (Tone.Reverb | Tone.Analyser)[];
 
   // functions
   insertTrack: () => void;
@@ -70,4 +71,5 @@ export interface ICheckedStep {
   stepId: string | undefined;
   trackIndex: string | undefined;
   rect: DOMRect;
+  instrument: IInstrument;
 }

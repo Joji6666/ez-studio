@@ -11,6 +11,7 @@ import { calculateSequenceDuration } from "../../../../lib/common_function";
 import usePad from "../../pad/store/usePad";
 import useTopToolbar from "../../topToolbar.tsx/store/useTopToolbar";
 import useInstrument from "../../instrumentSelector/store/useInstrument";
+import type { IInstrument } from "../../instrumentSelector/util/instrument_selector_interface";
 
 let xPo = 0;
 
@@ -33,6 +34,7 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
   timelineAnimationId: null,
   measureWidth: 0,
   measures: 0,
+  effectors: [],
 
   // fuctions
 
@@ -124,12 +126,21 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
     const isPlayListPlaying = get().isPlayListPlaying;
     const playListSequence = get().playListSequence;
     const checkedSteps = get().checkedSteps;
-    const playListTracks = get().playListTracks;
     const bpm = useTopToolbar.getState().bpm;
     const loadedInstrument = useInstrument.getState().loadedInstrument;
     const timelineAnimationId = get().timelineAnimationId;
+
     await Tone.start(); // Tone 오디오 컨텍스트를 활성화
+
     if (isPlayListPlaying) {
+      const effectors = get().effectors;
+
+      if (effectors.length > 0) {
+        effectors.forEach((effector) => {
+          effector.dispose();
+        });
+      }
+
       if (playListSequence) {
         playListSequence.dispose(); // 컴포넌트 언마운트 시 시퀀스 해제
       }
@@ -141,13 +152,36 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
       set(() => ({
         isPlayListPlaying: false,
         timelineAnimationId: null,
+        effectors: [],
       }));
       Tone.Transport.stop();
     } else {
       Tone.Transport.bpm.value = bpm; // BPM 설정
-      const analyzer = new Tone.Analyser("fft", 32);
 
-      const checkedStepsRects = checkedSteps.map((step) => step.rect);
+      const analyzer = new Tone.Analyser("fft", 32).toDestination();
+      //   const pitchShift = new Tone.PitchShift({
+      //     pitch: 11,
+      //     delayTime: 0,
+      //     windowSize: 0.5,
+      //   }).toDestination();
+      const reverb = new Tone.Reverb(2).toDestination();
+      //   const checkedStepsRects = checkedSteps.map((step) => step.rect);
+
+      const objectSteps: {
+        [stepLeft: number]: {
+          right: number;
+          stepIndex: number;
+          left: number;
+        };
+      } = {};
+
+      checkedSteps.forEach((step, index) => {
+        objectSteps[Math.round(step.rect.left)] = {
+          right: Math.round(step.rect.right),
+          stepIndex: index,
+          left: Math.round(step.rect.left),
+        };
+      });
 
       const stepDuration = (60 * 1000) / bpm; // 한 스텝의 지속 시간 계산 (ms)
       const baseWidth = 7; // 각 스텝의 기준 이동 거리 (px)
@@ -167,38 +201,66 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
 
           const timelineBarRect = element.getBoundingClientRect();
 
-          checkedStepsRects.forEach((rect, index) => {
+          if (objectSteps[Math.round(timelineBarRect.right)]) {
             if (
-              Math.round(timelineBarRect.right) === Math.round(rect.left) &&
-              Math.round(rect.right) === Math.round(timelineBarRect.left + 9)
+              Math.round(timelineBarRect.right) ===
+                objectSteps[Math.round(timelineBarRect.right)].left &&
+              objectSteps[Math.round(timelineBarRect.right)].right ===
+                Math.round(timelineBarRect.left + 9)
             ) {
-              const step = checkedSteps[index];
-              if (
-                step.trackIndex &&
-                step.patternIndex &&
-                step.childPatternIndex
-              ) {
+              const step =
+                checkedSteps[
+                  objectSteps[Math.round(timelineBarRect.right)].stepIndex
+                ];
+              if (step && step.patternIndex) {
                 if (
                   step.stepId &&
                   playedStep[step.stepId] !== step.patternIndex
                 ) {
-                  const instrument =
-                    loadedInstrument[
-                      playListTracks[Number(step.trackIndex)].patterns[
-                        Number(step.patternIndex)
-                      ].pattern[Number(step.childPatternIndex)].instrument.url
-                    ];
-                  instrument.connect(analyzer);
-                  analyzer.toDestination();
+                  const instrument = loadedInstrument[step.instrument.url];
+
+                  instrument.chain(reverb, analyzer);
+
                   instrument.start();
+
                   playedStep[step.stepId] = step.patternIndex;
                 }
               }
             }
-          });
+          }
+
+          // 배열 순회 방식
+
+          //   checkedStepsRects.forEach((rect, index) => {
+          //     if (
+          //       Math.round(timelineBarRect.right) === Math.round(rect.left) &&
+          //       Math.round(rect.right) === Math.round(timelineBarRect.left + 9)
+          //     ) {
+          //       const step = checkedSteps[index];
+          //       if (
+          //      step &&
+          //         step.patternIndex
+
+          //       ) {
+          //         if (
+          //           step.stepId &&
+          //           playedStep[step.stepId] !== step.patternIndex
+          //         ) {
+          //           const instrument = loadedInstrument[step.instrument.url];
+
+          //           instrument.chain(reverb, analyzer);
+
+          //           instrument.start();
+
+          //           playedStep[step.stepId] = step.patternIndex;
+          //         }
+          //       }
+          //     }
+          //   });
         }
         set(() => ({
           timelineAnimationId: requestAnimationFrame(render),
+          effectors: [analyzer, reverb],
         }));
       };
 
@@ -293,8 +355,23 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
       checkedSteps.forEach((stepEl) => {
         const element = stepEl as HTMLElement;
 
-        const { childPatternIndex, patternIndex, stepId, trackIndex } =
-          element.dataset;
+        const {
+          childPatternIndex,
+          patternIndex,
+          stepId,
+          trackIndex,
+          instrument,
+        } = element.dataset;
+
+        let newInstrument: IInstrument = {
+          url: "",
+          name: "",
+          group: "",
+        };
+
+        if (instrument) {
+          newInstrument = JSON.parse(instrument);
+        }
 
         const newCheckedStepOption: ICheckedStep = {
           childPatternIndex,
@@ -302,6 +379,7 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
           stepId,
           trackIndex,
           rect: element.getBoundingClientRect(),
+          instrument: newInstrument,
         };
 
         newCheckedSteps.push(newCheckedStepOption);

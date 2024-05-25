@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import "./style/pad.scss";
 import usePad from "./store/usePad";
 import usePlayList from "../playList/store/usePlayList";
+import useModal from "../modal/store/useModal";
 
 const Pad = () => {
   const {
@@ -16,6 +17,7 @@ const Pad = () => {
     handlePadPlay,
   } = usePad();
   const { insertTrack } = usePlayList();
+  const { handleModal } = useModal();
 
   useEffect(() => {
     if (tracks.length === 0) {
@@ -76,6 +78,9 @@ const Pad = () => {
                           <label htmlFor={step.id}></label>
                         </div>
                       ))}
+                    </div>
+                    <div onClick={() => handleModal("Effector", "open")}>
+                      Fx
                     </div>
                   </div>
                 ))}
