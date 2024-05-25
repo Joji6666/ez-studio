@@ -172,15 +172,25 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
           right: number;
           stepIndex: number;
           left: number;
-        };
+        }[];
       } = {};
 
       checkedSteps.forEach((step, index) => {
-        objectSteps[Math.round(step.rect.left)] = {
-          right: Math.round(step.rect.right),
-          stepIndex: index,
-          left: Math.round(step.rect.left),
-        };
+        if (objectSteps[Math.round(step.rect.left)]) {
+          objectSteps[Math.round(step.rect.left)].push({
+            right: Math.round(step.rect.right),
+            stepIndex: index,
+            left: Math.round(step.rect.left),
+          });
+        } else {
+          objectSteps[Math.round(step.rect.left)] = [
+            {
+              right: Math.round(step.rect.right),
+              stepIndex: index,
+              left: Math.round(step.rect.left),
+            },
+          ];
+        }
       });
 
       const stepDuration = (60 * 1000) / bpm; // 한 스텝의 지속 시간 계산 (ms)
@@ -204,28 +214,31 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
           if (objectSteps[Math.round(timelineBarRect.right)]) {
             if (
               Math.round(timelineBarRect.right) ===
-                objectSteps[Math.round(timelineBarRect.right)].left &&
-              objectSteps[Math.round(timelineBarRect.right)].right ===
+                objectSteps[Math.round(timelineBarRect.right)][0].left &&
+              objectSteps[Math.round(timelineBarRect.right)][0].right ===
                 Math.round(timelineBarRect.left + 9)
             ) {
-              const step =
-                checkedSteps[
-                  objectSteps[Math.round(timelineBarRect.right)].stepIndex
-                ];
-              if (step && step.patternIndex) {
-                if (
-                  step.stepId &&
-                  playedStep[step.stepId] !== step.patternIndex
-                ) {
-                  const instrument = loadedInstrument[step.instrument.url];
+              const steps = objectSteps[Math.round(timelineBarRect.right)];
 
-                  instrument.chain(reverb, analyzer);
+              steps.forEach((step) => {
+                const targetStep = checkedSteps[step.stepIndex];
 
-                  instrument.start();
+                if (targetStep && targetStep.patternIndex) {
+                  if (
+                    targetStep.stepId &&
+                    playedStep[targetStep.stepId] !== targetStep.patternIndex
+                  ) {
+                    const instrument =
+                      loadedInstrument[targetStep.instrument.url];
 
-                  playedStep[step.stepId] = step.patternIndex;
+                    instrument.chain(reverb, analyzer);
+
+                    instrument.start();
+
+                    playedStep[targetStep.stepId] = targetStep.patternIndex;
+                  }
                 }
-              }
+              });
             }
           }
 
