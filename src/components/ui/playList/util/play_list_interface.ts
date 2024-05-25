@@ -33,6 +33,11 @@ export interface IPlayListStore {
     pattern: IPattern
   ) => void;
 
+  handleInstrumentDrop: (
+    e: React.DragEvent<HTMLDivElement>,
+    trackIndex: number
+  ) => void;
+
   calculateMeasureWidth: (noteValue: string, baseWidth: number) => number;
   initMeasure: () => void;
 }

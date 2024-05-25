@@ -1,17 +1,16 @@
 import { useRef, useEffect } from "react";
-import { IPlayListStep } from "./util/play_list_interface";
+
 import * as Tone from "tone";
 
 interface IWaveVisuallizerProps {
-  step: IPlayListStep;
   player: Tone.Player;
 }
 
-const WaveVisualizer = ({ step, player }: IWaveVisuallizerProps) => {
+const WaveVisualizer = ({ player }: IWaveVisuallizerProps) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
-    if (player.buffer && step.isChecked && canvasRef.current) {
+    if (player.buffer && canvasRef.current) {
       const canvas = canvasRef.current;
       if (canvas) {
         const canvasContext = canvas.getContext("2d");
@@ -20,7 +19,7 @@ const WaveVisualizer = ({ step, player }: IWaveVisuallizerProps) => {
         }
       }
     }
-  }, [player, step.isChecked]);
+  }, [player]);
 
   const drawWaveform = (
     canvasContext: CanvasRenderingContext2D,
@@ -63,8 +62,8 @@ const WaveVisualizer = ({ step, player }: IWaveVisuallizerProps) => {
   return (
     <canvas
       ref={canvasRef}
-      width={100}
-      height={50}
+      width={30}
+      height={70}
       className="pattern-step"
     ></canvas>
   );

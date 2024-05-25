@@ -3,6 +3,8 @@ import "./style/play_list.scss";
 import usePlayList from "./store/usePlayList";
 import type { ICheckedStep } from "./util/play_list_interface";
 import type { IInstrument } from "../instrumentSelector/util/instrument_selector_interface";
+import WaveVisualizer from "./WaveVisualizer";
+import useInstrument from "../instrumentSelector/store/useInstrument";
 
 const PlayList = () => {
   const {
@@ -17,7 +19,10 @@ const PlayList = () => {
     handleMouseDown,
     handleMouseUp,
     handleMouseMove,
+    handleInstrumentDrop,
   } = usePlayList();
+
+  const { loadedInstrument } = useInstrument();
 
   useEffect(() => {
     if (playListTracks.length > 0 && !isDragging) {
@@ -118,6 +123,8 @@ const PlayList = () => {
               onMouseMove={handleMouseMove}
               onMouseUp={handleMouseUp}
               onMouseLeave={handleMouseUp}
+              onDrop={(e) => handleInstrumentDrop(e, trackIndex)}
+              onDragOver={(e) => e.preventDefault()}
             >
               <div className="play-list-track-content-pattern-wrapper">
                 <div
@@ -133,12 +140,34 @@ const PlayList = () => {
                         handleMouseDown(e, playListTrack.id, pattern)
                       }
                       style={{
-                        minWidth: pattern.pattern[0].steps.length * 7,
-                        maxWidth: pattern.pattern[0].steps.length * 7,
+                        minWidth: playListTrack.instrument
+                          ? "50px"
+                          : pattern.pattern[0].steps.length * 7,
+                        maxWidth: playListTrack.instrument
+                          ? "50px"
+                          : pattern.pattern[0].steps.length * 7,
 
                         left: `${pattern.x}px`,
                       }}
                     >
+                      {playListTrack.instrument &&
+                        playListTrack.instrument?.url !== "" && (
+                          <div
+                            className="wave-visualizer"
+                            data-track-id={playListTrack.id}
+                            data-track-index={trackIndex}
+                            data-pattern-index={patternIndex}
+                            data-instrument={JSON.stringify(
+                              playListTrack.instrument
+                            )}
+                          >
+                            <WaveVisualizer
+                              player={
+                                loadedInstrument[playListTrack.instrument?.url]
+                              }
+                            />
+                          </div>
+                        )}
                       <div className="play-list-track-content-child-pattern-content-wrapper">
                         {pattern.pattern.map(
                           (childPattern, childPatternIndex) => (
@@ -149,7 +178,7 @@ const PlayList = () => {
                               {childPattern.steps.map((step) => (
                                 <div key={step.id}>
                                   {step.isChecked ? (
-                                    <p
+                                    <div
                                       data-track-index={trackIndex}
                                       data-pattern-index={patternIndex}
                                       data-child-pattern-index={
@@ -160,7 +189,7 @@ const PlayList = () => {
                                       )}
                                       data-step-id={step.id}
                                       className="pattern-step"
-                                    ></p>
+                                    ></div>
                                   ) : (
                                     <p
                                       style={{

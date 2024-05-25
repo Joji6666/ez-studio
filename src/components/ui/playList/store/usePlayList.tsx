@@ -168,12 +168,40 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
       //   const checkedStepsRects = checkedSteps.map((step) => step.rect);
 
       const objectSteps: {
-        [stepLeft: number]: {
+        [stepLeft: number | string]: {
           right: number;
           stepIndex: number;
           left: number;
+          isWaveVisualizer?: boolean;
         }[];
       } = {};
+
+      const waveVisualizerElements =
+        document.querySelectorAll(".wave-visualizer");
+
+      if (waveVisualizerElements.length > 0) {
+        waveVisualizerElements.forEach((el, index) => {
+          //   const element = el as HTMLElement;
+          const rect = el.getBoundingClientRect();
+          if (objectSteps[`isWaveVisualizer${Math.round(rect.left)}`]) {
+            objectSteps[`isWaveVisualizer${Math.round(rect.left)}`].push({
+              right: rect.right,
+              left: rect.left,
+              stepIndex: index,
+              isWaveVisualizer: true,
+            });
+          } else {
+            objectSteps[`isWaveVisualizer${Math.round(rect.left)}`] = [
+              {
+                right: rect.right,
+                left: rect.left,
+                stepIndex: index,
+                isWaveVisualizer: true,
+              },
+            ];
+          }
+        });
+      }
 
       checkedSteps.forEach((step, index) => {
         if (objectSteps[Math.round(step.rect.left)]) {
@@ -210,6 +238,38 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
           element.style.transform = `translateX(${xPo}px)`;
 
           const timelineBarRect = element.getBoundingClientRect();
+
+          if (
+            objectSteps[`isWaveVisualizer${Math.round(timelineBarRect.right)}`]
+          ) {
+            const steps =
+              objectSteps[
+                `isWaveVisualizer${Math.round(timelineBarRect.right)}`
+              ];
+
+            steps.forEach((step) => {
+              const targetStep = waveVisualizerElements[step.stepIndex];
+
+              if (targetStep) {
+                const element = targetStep as HTMLElement;
+
+                const { instrument, patternIndex, trackId } = element.dataset;
+
+                if (instrument && trackId && patternIndex) {
+                  if (playedStep[trackId] !== patternIndex) {
+                    const targetInstrument =
+                      loadedInstrument[JSON.parse(instrument).url];
+
+                    targetInstrument.chain(reverb, analyzer);
+
+                    targetInstrument.start();
+
+                    playedStep[trackId] = patternIndex;
+                  }
+                }
+              }
+            });
+          }
 
           if (objectSteps[Math.round(timelineBarRect.right)]) {
             if (
@@ -404,6 +464,37 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
 
     set(() => ({
       isDragging: false,
+    }));
+  },
+  handleInstrumentDrop: (
+    e: React.DragEvent<HTMLDivElement>,
+    trackIndex: number
+  ) => {
+    e.preventDefault();
+    const playListTracks = structuredClone(get().playListTracks);
+    const targetTrack = playListTracks[trackIndex];
+    const selectedIns = useInstrument.getState().selectedIns;
+
+    if (targetTrack) {
+      targetTrack.trackName = selectedIns.name;
+      targetTrack.instrument = selectedIns;
+      targetTrack.patterns.push({
+        id: v1(),
+        x: 0,
+        pattern: [
+          {
+            id: v1(),
+            steps: [{ id: v1(), isChecked: true }],
+            instrument: selectedIns,
+          },
+        ],
+        length: 1,
+        totalDuration: 0,
+      });
+    }
+
+    set(() => ({
+      playListTracks,
     }));
   },
   increaseStep: () => {
