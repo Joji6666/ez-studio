@@ -165,7 +165,6 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
       //     windowSize: 0.5,
       //   }).toDestination();
       const reverb = new Tone.Reverb(2).toDestination();
-      //   const checkedStepsRects = checkedSteps.map((step) => step.rect);
 
       const objectSteps: {
         [stepLeft: number | string]: {
@@ -477,11 +476,7 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
       playListTracks,
     }));
   },
-  increaseStep: () => {
-    set((state) => ({
-      currentStep: state.currentStep + 1,
-    }));
-  },
+
   initPlayList: () => {
     const handleScroll = get().handleScroll;
 

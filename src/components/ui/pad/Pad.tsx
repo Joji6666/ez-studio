@@ -4,6 +4,8 @@ import usePad from "./store/usePad";
 import usePlayList from "../playList/store/usePlayList";
 import useEffectorController from "../shared/modal/components/effector/store/useEffectorController";
 
+import useModal from "../shared/modal/store/useModal";
+
 const Pad = () => {
   const {
     tracks,
@@ -19,6 +21,7 @@ const Pad = () => {
   } = usePad();
   const { insertTrack } = usePlayList();
   const { effectorList } = useEffectorController();
+  const { handleModal } = useModal();
 
   useEffect(() => {
     if (tracks.length === 0) {
@@ -50,6 +53,21 @@ const Pad = () => {
             <button onClick={addTrack}>Add Pattern</button>
             <button onClick={insertTrack}>Insert Pattern</button>
           </div>
+
+          <div className="pad-piano-button-wrapper">
+            <button
+              onClick={() => handleModal("PianoRoll", "open")}
+              className="pad-piano-botton"
+            >
+              <img
+                src={"/icons/piano.svg"}
+                width={20}
+                height={20}
+                alt="piano-btn"
+              />
+            </button>
+          </div>
+
           <div className="effector-plugin-wrapper">
             <img
               src={"icons/plugin.svg"}

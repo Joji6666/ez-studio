@@ -1,0 +1,41 @@
+main {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+  h1 {
+    font-size: 62px;
+  }
+
+  .main-logo-wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.1s;
+  }
+
+  .main-button-wrapper {
+    width: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    z-index: 9999;
+
+    button {
+      padding: 15px;
+      background-color: slateblue;
+      color: white;
+      font-weight: bold;
+      border-radius: 20px;
+    }
+  }
+
+  .main-update-release-wrapper {
+    margin-top: 20px;
+  }
+}

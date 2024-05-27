@@ -25,6 +25,13 @@ const useModal = create<IModalStore>((set, get) => ({
       height: 500,
       isVisible: false,
     },
+    PianoRoll: {
+      title: "PianoRoll",
+      path: "pianoRoll/PianoRoll.tsx",
+      width: 400,
+      height: 500,
+      isVisible: false,
+    },
   },
 
   handleModal: (title: string, action: string) => {

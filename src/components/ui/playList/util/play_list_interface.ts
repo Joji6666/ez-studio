@@ -22,7 +22,6 @@ export interface IPlayListStore {
   // functions
   insertTrack: () => void;
   handleStart: () => void;
-  increaseStep: () => void;
   initPlayList: () => void;
   handleScroll: (scrollX: number) => void;
   handleMouseMove: (e: React.MouseEvent<HTMLElement, MouseEvent>) => void;

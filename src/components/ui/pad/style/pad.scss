@@ -14,6 +14,17 @@ select {
   padding: 3px;
   gap: 3px;
 
+  .pad-piano-button-wrapper {
+    border: 1px solid lime;
+    button {
+      background-color: gray;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1px;
+    }
+  }
+
   .track-toolbar-button-wrapper {
     display: flex;
     flex-direction: row;
