@@ -12,7 +12,7 @@ const usePad = create<IPadStore>((set, get) => ({
   tracks: [],
   steps: 16,
   loadedInstrument: {},
-  selectedTrackId: "track1",
+  selectedTrackId: "pattern1",
   selectedTrack: {
     trackName: "",
     id: "",
@@ -28,7 +28,7 @@ const usePad = create<IPadStore>((set, get) => ({
 
     const newTrack: ITrack = {
       id: v1(),
-      trackName: `track${track.length + 1}`,
+      trackName: `pattern${track.length + 1}`,
       patterns: [
         {
           id: v1(),
@@ -100,7 +100,7 @@ const usePad = create<IPadStore>((set, get) => ({
 
     const newTrack: ITrack = {
       id: v1(),
-      trackName: "track1",
+      trackName: "pattern1",
       patterns: basicPadSetup,
       totalDuration: 0,
     };
@@ -205,26 +205,34 @@ const usePad = create<IPadStore>((set, get) => ({
       const newSequence = new Tone.Sequence(
         (time, step) => {
           if (targetTrack) {
+            const connectedEffector: {
+              [key: string]: { [key: string]: number | string };
+            } = {};
+
+            if (targetTrack.effector) {
+              targetTrack.effector.slots.forEach((slot) => {
+                if (slot.connectedEffector) {
+                  Object.entries(slot.value).forEach(([key, value]) => {
+                    connectedEffector[key] = value;
+                  });
+                }
+              });
+            }
+
             targetTrack.patterns.forEach((pattern) => {
               const currentStep = pattern.steps[step % steps];
               if (currentStep.isChecked) {
                 const instrument = loadedInstrument[pattern.instrument.url];
                 instrument.connect(analyzer);
                 analyzer.toDestination();
-
-                if (targetTrack.effector) {
-                  targetTrack.effector.slots.forEach((slot) => {
-                    if (slot.connectedEffector) {
-                      Object.entries(slot.value).forEach(([key, value]) => {
-                        if (key === "reverb") {
-                          instrument.connect(reverb);
-                          reverb.decay = value.decay;
-                        }
-                      });
+                if (Object.keys(connectedEffector).length > 0) {
+                  Object.entries(connectedEffector).forEach(([key, value]) => {
+                    if (key === "reverb") {
+                      instrument.connect(reverb);
+                      reverb.decay = value.decay;
                     }
                   });
                 }
-
                 instrument.start(time); // 오디오 재생
               }
             });

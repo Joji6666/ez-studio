@@ -443,6 +443,7 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
     if (timelinebarElement) {
       const element = timelinebarElement as HTMLElement;
       element.style.transform = `translateX(0px)`;
+      xPo = 0;
     }
   },
   handleInstrumentDrop: (

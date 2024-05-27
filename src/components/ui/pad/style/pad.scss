@@ -2,22 +2,34 @@
   width: 30%;
   border: 1px solid black;
 }
+select {
+  min-width: 80px;
+  max-width: 80px;
+}
 
 .track-toolbar {
   border-bottom: 1px solid black;
   display: flex;
   flex-direction: row;
   padding: 3px;
+  gap: 3px;
 
   .track-toolbar-button-wrapper {
     display: flex;
     flex-direction: row;
     gap: 2px;
+    border: 1px solid lime;
+    .pad-play-botton {
+      width: 30px;
+    }
 
     button {
+      background-color: gray;
       display: flex;
       align-items: center;
       justify-content: center;
+      color: cyan;
+      padding: 1px;
     }
   }
 }
@@ -28,10 +40,6 @@
   height: 200px;
   overflow-y: auto;
   background-color: rgb(90, 89, 89);
-}
-
-button {
-  background-color: red;
 }
 
 .pad-track-wrapper {
@@ -151,4 +159,12 @@ button {
       }
     }
   }
+}
+
+.effector-plugin-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px;
+  border: 1px solid lime;
 }

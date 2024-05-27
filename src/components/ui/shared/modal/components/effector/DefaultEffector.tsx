@@ -1,4 +1,5 @@
 import { useState } from "react";
+import "./style/default_effector.scss";
 import CircleSlider from "../../../slider/CircleSlider";
 
 import useEffectorController from "./store/useEffectorController";
@@ -31,17 +32,21 @@ const DefaultEffector = () => {
   };
 
   return (
-    <div>
-      DefaultEffector
-      <div>
-        Reverb
-        <CircleSlider type="reverb" onChange={handleOnChange} />
-        <CircleSlider type="reverb-preDelay" onChange={handleOnChange} />
+    <div className="default-effector-container">
+      <div className="default-effector-reverb-wrapper">
+        <p>Reverb</p>
+        <div className="reverb-slider-wrapper">
+          <CircleSlider type="reverb" onChange={handleOnChange} />
+          <CircleSlider type="reverb-preDelay" onChange={handleOnChange} />
+        </div>
       </div>
-      <div>Distostion</div>
-      <CircleSlider type="distostion" onChange={handleOnChange} />
-      <div>
-        Delay
+      <div className="default-effector-distortion-wrapper">
+        <p> Distortion</p>
+        <CircleSlider type="distostion" onChange={handleOnChange} />
+      </div>
+
+      <div className="default-effector-delay-wrapper">
+        <p>Delay</p>
         <CircleSlider type="delay" onChange={handleOnChange} />
       </div>
     </div>

@@ -6,7 +6,7 @@ import useModal from "../shared/modal/store/useModal";
 
 const TopToolbar = () => {
   const { handleBpm, handleNoteValue } = useTopToolbar();
-  const { handleStart, handleTimelineReset } = usePlayList();
+  const { isPlayListPlaying, handleStart, handleTimelineReset } = usePlayList();
   const { handleModal } = useModal();
   const noteValues: { label: string; key: string }[] = [
     { label: "1n", key: "1n" },
@@ -19,31 +19,62 @@ const TopToolbar = () => {
 
   return (
     <section className="top-toolbar-section">
-      <input
-        type="number"
-        onChange={handleBpm}
-        min="5"
-        max="300"
-        defaultValue={120}
-      />
+      <div className="bpm-controller-wrapper">
+        <label>BPM</label>
+        <input
+          type="number"
+          onChange={handleBpm}
+          min="5"
+          max="300"
+          defaultValue={120}
+        />
+      </div>
+      <div className="note-value-controller">
+        <label>NOTE</label>
+        <select name="noteValue" onChange={handleNoteValue} defaultValue={"8n"}>
+          {noteValues.map((note) => (
+            <option key={note.key} value={note.key}>
+              {note.label}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="start-botton-wrapper">
+        <button onClick={handleStart}>
+          <img
+            src={!isPlayListPlaying ? "icons/play.svg" : "icons/pause.svg"}
+            width={15}
+            height={15}
+            alt={!isPlayListPlaying ? "play" : "pause"}
+          />
+        </button>
+        <button onClick={handleTimelineReset}>
+          <img src={"icons/stop.svg"} width={15} height={15} alt="reset" />
+        </button>
 
-      <select
-        name="padTrackList"
-        onChange={handleNoteValue}
-        defaultValue={"8n"}
-      >
-        {noteValues.map((note) => (
-          <option key={note.key} value={note.key}>
-            {note.label}
-          </option>
-        ))}
-      </select>
+        <button>
+          <img
+            src={"icons/recording.svg"}
+            width={15}
+            height={15}
+            alt="recording"
+          />
+        </button>
+      </div>
+      <div className="effector-icon-wrapper">
+        <button onClick={() => handleModal("Effector", "open")}>
+          <img
+            src={"icons/effector.svg"}
+            width={40}
+            height={40}
+            alt="play-btn"
+          />
+        </button>
+      </div>
 
-      <button onClick={handleStart}>start</button>
-      <button onClick={handleTimelineReset}>reset</button>
-      <button onClick={() => handleModal("Effector", "open")}>Effector</button>
-
-      <AudioVisualizer />
+      <div className="analizer-wrapper">
+        <AudioVisualizer />
+      </div>
     </section>
   );
 };

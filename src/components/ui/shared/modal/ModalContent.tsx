@@ -23,12 +23,14 @@ const ModalContent = ({ option }: IModalContentProps) => {
       <div className="modal-toolbar">
         <span>{option.title}</span>
         <button onClick={() => handleModal(option.title, "close")}>
-          Close
+          <img src="/icons/close.svg" width={15} height={15} />
         </button>
       </div>
-      <Suspense fallback={<div>Loading...</div>}>
-        <DynamicComponent />
-      </Suspense>
+      <div className="modal-content-wrapper">
+        <Suspense fallback={<div>Loading...</div>}>
+          <DynamicComponent />
+        </Suspense>
+      </div>
     </div>
   );
 };

@@ -13,8 +13,8 @@ const useModal = create<IModalStore>((set, get) => ({
     EffectorSelector: {
       title: "EffectorSelector",
       path: "effector/EffectorSelector.tsx",
-      width: 400,
-      height: 500,
+      width: 1000,
+      height: 700,
       isVisible: false,
     },
 

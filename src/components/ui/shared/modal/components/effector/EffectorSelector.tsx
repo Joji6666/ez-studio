@@ -10,7 +10,6 @@ const EffectorSelector = () => {
 
   return (
     <div>
-      EffectorSelector
       {effectorComponents.map((option) => (
         <div
           className="effector-selector-card"
@@ -21,8 +20,7 @@ const EffectorSelector = () => {
           <div className="effector-selector-card-component">
             <option.Component />
           </div>
-
-          {option.title}
+          <p>{option.title}</p>
         </div>
       ))}
     </div>

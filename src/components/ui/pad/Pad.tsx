@@ -21,7 +21,6 @@ const Pad = () => {
   const { effectorList } = useEffectorController();
 
   useEffect(() => {
-    console.log(tracks, "tracks@");
     if (tracks.length === 0) {
       initPad();
     }
@@ -40,7 +39,7 @@ const Pad = () => {
           </select>
 
           <div className="track-toolbar-button-wrapper">
-            <button onClick={handlePadPlay}>
+            <button onClick={handlePadPlay} className="pad-play-botton">
               <img
                 src={!isPadPlaying ? "icons/play.svg" : "icons/pause.svg"}
                 width={15}
@@ -48,8 +47,17 @@ const Pad = () => {
                 alt="play-btn"
               />
             </button>
-            <button onClick={addTrack}>Add Track</button>
-            <button onClick={insertTrack}>Insert Track</button>
+            <button onClick={addTrack}>Add Pattern</button>
+            <button onClick={insertTrack}>Insert Pattern</button>
+          </div>
+          <div className="effector-plugin-wrapper">
+            <img
+              src={"icons/plugin.svg"}
+              width={15}
+              height={15}
+              alt="effector-plugin"
+            />
+
             <select
               name="padEffectorList"
               onChange={(e) => handleEffector(Number(e.target.value))}
@@ -92,17 +100,26 @@ const Pad = () => {
                         </div>
                       ))}
                     </div>
-                    <select
-                      name="patternEffectorList"
-                      onChange={handleTrackSelect}
-                    >
-                      <option value={undefined}></option>
-                      {effectorList.map((effector, effectorIndex) => (
-                        <option key={effector.id} value={effectorIndex}>
-                          {effector.effectorName}
-                        </option>
-                      ))}
-                    </select>
+                    <div className="effector-plugin-wrapper">
+                      <img
+                        src={"icons/plugin.svg"}
+                        width={15}
+                        height={15}
+                        alt="effector-plugin"
+                      />
+
+                      <select
+                        name="padEffectorList"
+                        onChange={(e) => handleEffector(Number(e.target.value))}
+                      >
+                        <option value={undefined}></option>
+                        {effectorList.map((effector, effectorIndex) => (
+                          <option key={effector.id} value={effectorIndex}>
+                            {effector.effectorName}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
                 ))}
               </div>
