@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import "./style/pad.scss";
 import usePad from "./store/usePad";
 import usePlayList from "../playList/store/usePlayList";
-import useModal from "../modal/store/useModal";
+import useEffectorController from "../shared/modal/components/effector/store/useEffectorController";
 
 const Pad = () => {
   const {
@@ -15,11 +15,13 @@ const Pad = () => {
     handleDrop,
     handleTrackSelect,
     handlePadPlay,
+    handleEffector,
   } = usePad();
   const { insertTrack } = usePlayList();
-  const { handleModal } = useModal();
+  const { effectorList } = useEffectorController();
 
   useEffect(() => {
+    console.log(tracks, "tracks@");
     if (tracks.length === 0) {
       initPad();
     }
@@ -48,6 +50,17 @@ const Pad = () => {
             </button>
             <button onClick={addTrack}>Add Track</button>
             <button onClick={insertTrack}>Insert Track</button>
+            <select
+              name="padEffectorList"
+              onChange={(e) => handleEffector(Number(e.target.value))}
+            >
+              <option value={undefined}></option>
+              {effectorList.map((effector, effectorIndex) => (
+                <option key={effector.id} value={effectorIndex}>
+                  {effector.effectorName}
+                </option>
+              ))}
+            </select>
           </div>
         </div>
         {tracks.map(
@@ -79,9 +92,17 @@ const Pad = () => {
                         </div>
                       ))}
                     </div>
-                    <div onClick={() => handleModal("Effector", "open")}>
-                      Fx
-                    </div>
+                    <select
+                      name="patternEffectorList"
+                      onChange={handleTrackSelect}
+                    >
+                      <option value={undefined}></option>
+                      {effectorList.map((effector, effectorIndex) => (
+                        <option key={effector.id} value={effectorIndex}>
+                          {effector.effectorName}
+                        </option>
+                      ))}
+                    </select>
                   </div>
                 ))}
               </div>

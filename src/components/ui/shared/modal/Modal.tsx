@@ -7,10 +7,13 @@ const Modal = () => {
 
   return (
     <div className="modal-container">
-      {modals.map(
-        (option) =>
-          option.isVisible && <ModalContent key={option.path} option={option} />
-      )}
+      {Object.values(modals).length > 0 &&
+        Object.values(modals).map(
+          (option) =>
+            option.isVisible && (
+              <ModalContent key={option.path} option={option} />
+            )
+        )}
     </div>
   );
 };

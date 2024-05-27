@@ -1,0 +1,104 @@
+.circle-slider-container {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+
+.circle-slider-wrapper {
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  user-select: none;
+
+  .circle-slider-knob {
+    width: 44px;
+    height: 44px;
+    background: rgb(222, 222, 222);
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .circle-slider-rotator {
+      width: 36px;
+      height: 36px;
+      background: rgb(235, 235, 235);
+      border-radius: 50%;
+      box-shadow: 1px 1px 1px rgba(0, 0, 0, 0.2), inset 0.2px 0.4px 0.2px white,
+        0.4px -0.2px 0.2px rgba(0, 0, 0, 0.2),
+        -0.2px 0px 0.2px rgba(0, 0, 0, 0.2);
+      display: flex;
+      align-items: center;
+      position: relative;
+
+      .circle-slider-value-text {
+        width: 8px;
+        height: 8px;
+        margin: 0 3px;
+        font-family: poppins;
+        font-size: 3.2px;
+        font-weight: 600;
+        color: rgb(57, 55, 53);
+        border: 0.06mm solid rgba(57, 55, 53);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+    }
+
+    .circle-slider-pointer {
+      position: absolute;
+      width: 8px;
+      height: 8px;
+      top: calc(50% - 2px);
+      left: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transform-origin: 22px 2px;
+      transform: rotate(-45deg);
+
+      .circle-slider-pointer-icon {
+        font-size: 60px;
+        margin-top: 30px;
+        margin-bottom: 40px;
+        margin-left: 20px;
+        transform: rotate(180deg) translateX(3px);
+      }
+    }
+  }
+
+  circle {
+    fill: none;
+  }
+
+  circle:nth-child(1) {
+    stroke: rgba(0, 0, 0, 0.7);
+    stroke-width: 3px;
+    stroke-dasharray: 132;
+    transform-origin: center;
+    transform: rotate(135deg);
+    stroke-linecap: round;
+  }
+
+  circle:nth-child(2) {
+    stroke: rgb(2, 117, 232);
+    stroke-dashoffset: calc(176 - (132 * 10) / 100);
+    stroke-width: 3px;
+    stroke-dasharray: 176;
+    transform-origin: center;
+    transform: rotate(135deg);
+    stroke-linecap: round;
+  }
+}

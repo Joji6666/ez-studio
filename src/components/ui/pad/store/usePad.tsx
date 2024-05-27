@@ -5,6 +5,7 @@ import { instruments } from "../../../../constatns/instruments";
 import type { IPadPattern, IPadStore, ITrack } from "../util/pad_interface";
 import useInstrument from "../../instrumentSelector/store/useInstrument";
 import useTopToolbar from "../../topToolbar.tsx/store/useTopToolbar";
+import useEffectorController from "../../shared/modal/components/effector/store/useEffectorController";
 
 const usePad = create<IPadStore>((set, get) => ({
   // values
@@ -169,11 +170,13 @@ const usePad = create<IPadStore>((set, get) => ({
     const padSequence = get().padSequence;
     const steps = get().steps;
     const tracks = get().tracks;
-    const noteValue = useTopToolbar.getState().noteValue;
     const selectedTrackId = get().selectedTrackId;
+    const noteValue = useTopToolbar.getState().noteValue;
+
     const loadedInstrument = useInstrument.getState().loadedInstrument;
     const bpm = useTopToolbar.getState().bpm;
     const analyzer = useTopToolbar.getState().analyzer;
+    const targetTrack = tracks.find((track) => track.id === selectedTrackId);
 
     await Tone.start(); // Tone 오디오 컨텍스트를 활성화
     if (isPadPlaying) {
@@ -198,22 +201,34 @@ const usePad = create<IPadStore>((set, get) => ({
 
       // const totalDuration = calculateSequenceDuration(120, steps, "8n");
       const analyzer = new Tone.Analyser("fft", 32);
-
+      const reverb = new Tone.Reverb().toDestination();
       const newSequence = new Tone.Sequence(
         (time, step) => {
-          tracks.forEach((track) => {
-            if (selectedTrackId === track.id) {
-              track.patterns.forEach((pattern) => {
-                const currentStep = pattern.steps[step % steps];
-                if (currentStep.isChecked) {
-                  const instrument = loadedInstrument[pattern.instrument.url];
-                  instrument.connect(analyzer);
-                  analyzer.toDestination();
-                  instrument.start(time); // 오디오 재생
+          if (targetTrack) {
+            targetTrack.patterns.forEach((pattern) => {
+              const currentStep = pattern.steps[step % steps];
+              if (currentStep.isChecked) {
+                const instrument = loadedInstrument[pattern.instrument.url];
+                instrument.connect(analyzer);
+                analyzer.toDestination();
+
+                if (targetTrack.effector) {
+                  targetTrack.effector.slots.forEach((slot) => {
+                    if (slot.connectedEffector) {
+                      Object.entries(slot.value).forEach(([key, value]) => {
+                        if (key === "reverb") {
+                          instrument.connect(reverb);
+                          reverb.decay = value.decay;
+                        }
+                      });
+                    }
+                  });
                 }
-              });
-            }
-          });
+
+                instrument.start(time); // 오디오 재생
+              }
+            });
+          }
         },
         Array.from({ length: steps }, (_, i) => i),
         noteValue
@@ -227,6 +242,23 @@ const usePad = create<IPadStore>((set, get) => ({
       }));
 
       Tone.Transport.start();
+    }
+  },
+  handleEffector: (effectorIndex: number) => {
+    const tracks = structuredClone(get().tracks);
+    const selectedTrackId = get().selectedTrackId;
+    const targetTrack = tracks.find((track) => track.id === selectedTrackId);
+    const effectorList = useEffectorController.getState().effectorList;
+    const targetEffector = effectorList[effectorIndex];
+
+    if (targetTrack) {
+      if (targetEffector) {
+        targetTrack.effector = targetEffector;
+
+        set(() => ({
+          tracks,
+        }));
+      }
     }
   },
 }));

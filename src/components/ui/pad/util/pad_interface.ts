@@ -1,5 +1,6 @@
 import { IInstrument } from "../../instrumentSelector/util/instrument_selector_interface";
 import * as Tone from "tone";
+import type { IEffector } from "../../shared/modal/components/effector/util/effector_controller_interface";
 export interface IStep {
   id: string;
   isChecked: boolean;
@@ -10,6 +11,7 @@ export interface ITrack {
   id: string;
   patterns: IPadPattern[];
   totalDuration: number;
+  effector?: IEffector;
 }
 
 export interface IPadPattern {
@@ -42,4 +44,5 @@ export interface IPadStore {
   handleTrackSelect: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 
   handlePadPlay: () => void;
+  handleEffector: (effectorIndex: number) => void;
 }

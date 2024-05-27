@@ -37,7 +37,7 @@ export interface IPlayListStore {
     e: React.DragEvent<HTMLDivElement>,
     trackIndex: number
   ) => void;
-
+  handleTimelineReset: () => void;
   calculateMeasureWidth: (noteValue: string, baseWidth: number) => number;
   initMeasure: () => void;
 }

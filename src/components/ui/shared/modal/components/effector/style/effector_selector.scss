@@ -1,0 +1,24 @@
+.effector-selector-card {
+  width: 200px;
+  height: 300px;
+  :hover {
+    scale: 1.05;
+  }
+
+  .effector-selector-card-component {
+    scale: 0.8;
+  }
+
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  flex-direction: column;
+
+  .effector-selector-card-layer {
+    width: 200px;
+    height: 300px;
+    position: absolute;
+    z-index: 100;
+    border: 1px solid black;
+  }
+}

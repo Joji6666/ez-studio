@@ -1,5 +1,5 @@
 export interface IModalStore {
-  modals: IModalOption[];
+  modals: IModals;
   handleModal: (title: string, action: string) => void;
 }
 
@@ -9,4 +9,8 @@ export interface IModalOption {
   isVisible: boolean;
   width?: number;
   height?: number;
+}
+
+export interface IModals {
+  [title: string]: IModalOption;
 }

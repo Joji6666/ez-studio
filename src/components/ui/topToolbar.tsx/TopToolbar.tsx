@@ -2,11 +2,12 @@ import "./style/top_toolbar.scss";
 import usePlayList from "../playList/store/usePlayList";
 import AudioVisualizer from "./AudioVisualizer";
 import useTopToolbar from "./store/useTopToolbar";
+import useModal from "../shared/modal/store/useModal";
 
 const TopToolbar = () => {
   const { handleBpm, handleNoteValue } = useTopToolbar();
-  const { handleStart } = usePlayList();
-
+  const { handleStart, handleTimelineReset } = usePlayList();
+  const { handleModal } = useModal();
   const noteValues: { label: string; key: string }[] = [
     { label: "1n", key: "1n" },
     { label: "2n", key: "2n" },
@@ -39,6 +40,9 @@ const TopToolbar = () => {
       </select>
 
       <button onClick={handleStart}>start</button>
+      <button onClick={handleTimelineReset}>reset</button>
+      <button onClick={() => handleModal("Effector", "open")}>Effector</button>
+
       <AudioVisualizer />
     </section>
   );

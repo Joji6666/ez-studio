@@ -3,7 +3,7 @@ import Pad from "../ui/pad/Pad";
 import TopToolbar from "../ui/topToolbar.tsx/TopToolbar";
 import PlayList from "../ui/playList/PlayList";
 import "./main.scss";
-import Modal from "../ui/modal/Modal";
+import Modal from "../ui/shared/modal/Modal";
 
 const Main = () => {
   return (

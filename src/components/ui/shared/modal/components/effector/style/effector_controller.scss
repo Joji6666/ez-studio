@@ -1,0 +1,22 @@
+.effector-controller-container {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  height: 100%;
+
+  .effector-controller-effector-list-wrapper {
+    width: 20%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    border-right: 1px solid black;
+  }
+  .effector-controller-effector-slot-list-wrapper {
+    width: 80%;
+    height: 100%;
+
+    .effector-slot-wrapper {
+      display: flex;
+    }
+  }
+}

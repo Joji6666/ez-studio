@@ -257,8 +257,9 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
 
                 if (instrument && trackId && patternIndex) {
                   if (playedStep[trackId] !== patternIndex) {
-                    const targetInstrument =
-                      loadedInstrument[JSON.parse(instrument).url];
+                    const targetInstrument = new Tone.Player(
+                      loadedInstrument[JSON.parse(instrument).url].buffer
+                    ).toDestination();
 
                     targetInstrument.chain(reverb, analyzer);
 
@@ -301,35 +302,6 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
               });
             }
           }
-
-          // 배열 순회 방식
-
-          //   checkedStepsRects.forEach((rect, index) => {
-          //     if (
-          //       Math.round(timelineBarRect.right) === Math.round(rect.left) &&
-          //       Math.round(rect.right) === Math.round(timelineBarRect.left + 9)
-          //     ) {
-          //       const step = checkedSteps[index];
-          //       if (
-          //      step &&
-          //         step.patternIndex
-
-          //       ) {
-          //         if (
-          //           step.stepId &&
-          //           playedStep[step.stepId] !== step.patternIndex
-          //         ) {
-          //           const instrument = loadedInstrument[step.instrument.url];
-
-          //           instrument.chain(reverb, analyzer);
-
-          //           instrument.start();
-
-          //           playedStep[step.stepId] = step.patternIndex;
-          //         }
-          //       }
-          //     }
-          //   });
         }
         set(() => ({
           timelineAnimationId: requestAnimationFrame(render),
@@ -465,6 +437,13 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
     set(() => ({
       isDragging: false,
     }));
+  },
+  handleTimelineReset: () => {
+    const timelinebarElement = document.querySelector(".timeline-bar-line");
+    if (timelinebarElement) {
+      const element = timelinebarElement as HTMLElement;
+      element.style.transform = `translateX(0px)`;
+    }
   },
   handleInstrumentDrop: (
     e: React.DragEvent<HTMLDivElement>,
