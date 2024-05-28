@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+
 import * as Tone from "tone";
 import usePlayList from "../../../../playList/store/usePlayList";
 import "./style/piano_roll.scss";
@@ -165,31 +166,17 @@ const PianoRoll = () => {
             </div>
           ))}
         </div>
+
         <div className="piano-roll-step-wrapper" style={{ right: scrollX }}>
-          {[...Array(12)].map((_, index) => (
-            <div
-              key={index}
-              className="measure"
-              style={{
-                minWidth: `${measureWidth}px`,
-                maxWidth: `${measureWidth}px`,
-              }}
-            >
-              {notes.map((note) => (
-                <div
-                  className="note-grid"
-                  key={`${note}${v1()}`}
-                  style={{
-                    width: "100%",
-                    height: "20px",
-                    borderBottom: "1px solid black",
-                    borderRight: "1px solid black",
-                    boxShadow: "inset 0 2px 5px rgba(0, 0, 0, 0.3)",
-                  }}
-                ></div>
-              ))}
-            </div>
-          ))}
+          <div
+            style={{
+              width: `${measureWidth * 12}px`,
+            }}
+          >
+            {notes.map((note) => (
+              <div className="note-grid" key={`${note}${v1()}`}></div>
+            ))}
+          </div>
         </div>
       </div>
     </div>
