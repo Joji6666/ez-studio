@@ -7,7 +7,7 @@ select {
   max-width: 80px;
 }
 
-.track-toolbar {
+.pattern-toolbar {
   border-bottom: 1px solid black;
   display: flex;
   flex-direction: row;
@@ -25,7 +25,7 @@ select {
     }
   }
 
-  .track-toolbar-button-wrapper {
+  .pattern-toolbar-button-wrapper {
     display: flex;
     flex-direction: row;
     gap: 2px;
@@ -53,7 +53,7 @@ select {
   background-color: rgb(90, 89, 89);
 }
 
-.pad-track-wrapper {
+.pad-pattern-wrapper {
   height: 100%;
   display: flex;
   flex-direction: column;
@@ -62,7 +62,7 @@ select {
   margin-top: 10px;
   border-top: 1px solid black;
 
-  .pattern-wrapper {
+  .instrument-wrapper {
     width: 100%;
     height: 30px;
     display: flex;

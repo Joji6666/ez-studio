@@ -38,43 +38,46 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
 
   // fuctions
 
-  insertTrack: () => {
-    const { tracks, selectedTrackId } = usePad.getState();
+  insertPattern: () => {
+    const { patterns, selectedPatternId } = usePad.getState();
     const playListTracks = structuredClone(get().playListTracks);
     const targetPlayListTrack = playListTracks.find(
-      (playListTrack) => playListTrack.trackId === selectedTrackId
+      (playListTrack) => playListTrack.trackId === selectedPatternId
     );
 
-    const selectedTrack = tracks.find((track) => track.id === selectedTrackId);
+    const selectedPattern = patterns.find(
+      (pattern) => pattern.id === selectedPatternId
+    );
 
     const totalDuration = calculateSequenceDuration(120, 16, "8n");
-    if (targetPlayListTrack && selectedTrack) {
+    if (targetPlayListTrack && selectedPattern) {
       targetPlayListTrack.patterns.push({
         id: v1(),
-        length: selectedTrack.patterns.length,
+        length: selectedPattern.instruments.length,
         x: 0,
-        pattern: selectedTrack.patterns,
+        pattern: selectedPattern.instruments,
         totalDuration,
       });
 
       set((state) => ({
         playListTracks,
-        totalStep: state.totalStep + selectedTrack.patterns[0].steps.length,
+        totalStep:
+          state.totalStep + selectedPattern.instruments[0].steps.length,
       }));
     } else {
-      if (selectedTrack) {
+      if (selectedPattern) {
         const emptyTrack = playListTracks.find(
           (playListTrack) => playListTrack.trackId === ""
         );
 
         if (emptyTrack) {
-          emptyTrack.trackName = selectedTrack.trackName;
-          emptyTrack.trackId = selectedTrack.id;
+          emptyTrack.trackName = selectedPattern.patternName;
+          emptyTrack.trackId = selectedPattern.id;
           emptyTrack.patterns.push({
             id: v1(),
-            length: selectedTrack.patterns.length,
+            length: selectedPattern.instruments.length,
             x: 0,
-            pattern: selectedTrack.patterns,
+            pattern: selectedPattern.instruments,
             totalDuration,
           });
 
@@ -88,20 +91,21 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
             patterns: [
               {
                 id: v1(),
-                length: selectedTrack.patterns.length,
+                length: selectedPattern.instruments.length,
                 x: 0,
-                pattern: selectedTrack.patterns,
+                pattern: selectedPattern.instruments,
                 totalDuration,
               },
             ],
             height: 0,
-            trackName: selectedTrack.trackName,
-            trackId: selectedTrack.id,
+            trackName: selectedPattern.patternName,
+            trackId: selectedPattern.id,
           };
 
           set((state) => ({
             playListTracks: [...state.playListTracks, newTrackOption],
-            totalStep: state.totalStep + selectedTrack.patterns[0].steps.length,
+            totalStep:
+              state.totalStep + selectedPattern.instruments[0].steps.length,
           }));
         }
       }

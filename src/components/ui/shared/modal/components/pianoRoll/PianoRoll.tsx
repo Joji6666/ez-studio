@@ -47,6 +47,14 @@ const PianoRoll = () => {
     }
   };
 
+  const handleGridClick = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    note: string
+  ) => {
+    console.log(e);
+    console.log(note);
+  };
+
   useEffect(() => {
     const synch = new Tone.Synth().toDestination();
     setSynth(synch);
@@ -78,6 +86,14 @@ const PianoRoll = () => {
               width={15}
               height={15}
               alt="recording"
+            />
+          </button>
+          <button>
+            <img
+              src={"icons/play.svg"}
+              width={15}
+              height={15}
+              alt="piano-start"
             />
           </button>
         </div>
@@ -174,7 +190,11 @@ const PianoRoll = () => {
             }}
           >
             {notes.map((note) => (
-              <div className="note-grid" key={`${note}${v1()}`}></div>
+              <div
+                onClick={(e) => handleGridClick(e, note)}
+                className="note-grid"
+                key={`${note}${v1()}`}
+              ></div>
             ))}
           </div>
         </div>

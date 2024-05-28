@@ -20,7 +20,7 @@ export interface IPlayListStore {
   effectors: (Tone.Reverb | Tone.Analyser)[];
 
   // functions
-  insertTrack: () => void;
+  insertPattern: () => void;
   handleStart: () => void;
   initPlayList: () => void;
   handleScroll: (scrollX: number) => void;

@@ -2,34 +2,38 @@ import { v1 } from "uuid";
 import { create } from "zustand";
 import * as Tone from "tone";
 import { instruments } from "../../../../constatns/instruments";
-import type { IPadPattern, IPadStore, ITrack } from "../util/pad_interface";
+import type {
+  IPatternInstrument,
+  IPadStore,
+  IPattern,
+} from "../util/pad_interface";
 import useInstrument from "../../instrumentSelector/store/useInstrument";
 import useTopToolbar from "../../topToolbar.tsx/store/useTopToolbar";
 import useEffectorController from "../../shared/modal/components/effector/store/useEffectorController";
 
 const usePad = create<IPadStore>((set, get) => ({
   // values
-  tracks: [],
+  patterns: [],
   steps: 16,
   loadedInstrument: {},
-  selectedTrackId: "pattern1",
-  selectedTrack: {
-    trackName: "",
+  selectedPatternId: "pattern1",
+  selectedPattern: {
+    patternName: "",
     id: "",
-    patterns: [],
+    instruments: [],
     totalDuration: 0,
   },
   padSequence: undefined,
   isPadPlaying: false,
   // functions
-  addTrack: () => {
+  addPattern: () => {
     const steps = get().steps;
-    const track = get().tracks;
+    const patterns = get().patterns;
 
-    const newTrack: ITrack = {
+    const newPattern: IPattern = {
       id: v1(),
-      trackName: `pattern${track.length + 1}`,
-      patterns: [
+      patternName: `pattern${patterns.length + 1}`,
+      instruments: [
         {
           id: v1(),
           instrument: instruments[0],
@@ -54,7 +58,7 @@ const usePad = create<IPadStore>((set, get) => ({
       totalDuration: 0,
     };
 
-    newTrack.patterns.forEach((pattern) => {
+    newPattern.instruments.forEach((pattern) => {
       for (let index = 0; index < steps; index++) {
         pattern.steps.push({
           id: v1(),
@@ -64,11 +68,11 @@ const usePad = create<IPadStore>((set, get) => ({
     });
 
     set((state) => ({
-      tracks: [...state.tracks, newTrack],
+      patterns: [...state.patterns, newPattern],
     }));
   },
   initPad: () => {
-    const basicPadSetup: IPadPattern[] = [
+    const basicPadSetup: IPatternInstrument[] = [
       {
         id: v1(),
         instrument: instruments[0],
@@ -98,38 +102,39 @@ const usePad = create<IPadStore>((set, get) => ({
       }
     });
 
-    const newTrack: ITrack = {
+    const newPattern: IPattern = {
       id: v1(),
-      trackName: "pattern1",
-      patterns: basicPadSetup,
+      patternName: "pattern1",
+      instruments: basicPadSetup,
       totalDuration: 0,
     };
 
     set(() => ({
-      tracks: [newTrack],
-      selectedTrack: newTrack,
-      selectedTrackId: newTrack.id,
+      patterns: [newPattern],
+      selectedPattern: newPattern,
+      selectedPatternId: newPattern.id,
     }));
   },
 
   handleCheck: (
-    trackIndex: number,
     patternIndex: number,
+    instrumentIndex: number,
     stepIndex: number
   ) => {
-    const selectedTrackId = get().selectedTrackId;
-    const tempTracks = structuredClone(get().tracks);
+    const selectedPatternId = get().selectedPatternId;
+    const tempPatterns = structuredClone(get().patterns);
 
-    if (selectedTrackId === tempTracks[trackIndex].id) {
-      const targetPattern = tempTracks[trackIndex].patterns[patternIndex];
+    if (selectedPatternId === tempPatterns[patternIndex].id) {
+      const targetPattern =
+        tempPatterns[patternIndex].instruments[instrumentIndex];
       const targetStep = targetPattern.steps[stepIndex];
       if (targetStep) {
         if (targetStep.isChecked) {
-          tempTracks[trackIndex].patterns[patternIndex].steps[
+          tempPatterns[patternIndex].instruments[instrumentIndex].steps[
             stepIndex
           ].isChecked = false;
         } else {
-          tempTracks[trackIndex].patterns[patternIndex].steps[
+          tempPatterns[patternIndex].instruments[instrumentIndex].steps[
             stepIndex
           ].isChecked = true;
         }
@@ -137,31 +142,32 @@ const usePad = create<IPadStore>((set, get) => ({
     }
 
     set(() => ({
-      tracks: tempTracks,
+      patterns: tempPatterns,
     }));
   },
   handleDrop: (
     e: React.DragEvent<HTMLDivElement>,
-    trackIndex: number,
-    patternIndex: number
+    patternIndex: number,
+    instrumentIndex: number
   ) => {
     e.preventDefault();
 
-    const tempTracks = structuredClone(get().tracks);
+    const tempPattenrs = structuredClone(get().patterns);
     const selectedIns = useInstrument.getState().selectedIns;
 
-    tempTracks[trackIndex].patterns[patternIndex].instrument = selectedIns;
+    tempPattenrs[patternIndex].instruments[instrumentIndex].instrument =
+      selectedIns;
 
     set(() => ({
-      tracks: tempTracks,
+      patterns: tempPattenrs,
     }));
   },
-  handleTrackSelect: (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const parsedValue: ITrack = JSON.parse(e.target.value);
+  handlePatternSelect: (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const parsedValue: IPattern = JSON.parse(e.target.value);
 
     set(() => ({
-      selectedTrackId: parsedValue.id,
-      selectedTrack: parsedValue,
+      selectedPatternId: parsedValue.id,
+      selectedPattern: parsedValue,
     }));
   },
 
@@ -169,14 +175,16 @@ const usePad = create<IPadStore>((set, get) => ({
     const isPadPlaying = get().isPadPlaying;
     const padSequence = get().padSequence;
     const steps = get().steps;
-    const tracks = get().tracks;
-    const selectedTrackId = get().selectedTrackId;
+    const patterns = get().patterns;
+    const selectedPatternId = get().selectedPatternId;
     const noteValue = useTopToolbar.getState().noteValue;
 
     const loadedInstrument = useInstrument.getState().loadedInstrument;
     const bpm = useTopToolbar.getState().bpm;
     const analyzer = useTopToolbar.getState().analyzer;
-    const targetTrack = tracks.find((track) => track.id === selectedTrackId);
+    const targetPattern = patterns.find(
+      (pattern) => pattern.id === selectedPatternId
+    );
 
     await Tone.start(); // Tone 오디오 컨텍스트를 활성화
     if (isPadPlaying) {
@@ -204,13 +212,13 @@ const usePad = create<IPadStore>((set, get) => ({
       const reverb = new Tone.Reverb().toDestination();
       const newSequence = new Tone.Sequence(
         (time, step) => {
-          if (targetTrack) {
+          if (targetPattern) {
             const connectedEffector: {
               [key: string]: { [key: string]: number | string };
             } = {};
 
-            if (targetTrack.effector) {
-              targetTrack.effector.slots.forEach((slot) => {
+            if (targetPattern.effector) {
+              targetPattern.effector.slots.forEach((slot) => {
                 if (slot.connectedEffector) {
                   Object.entries(slot.value).forEach(([key, value]) => {
                     connectedEffector[key] = value;
@@ -219,21 +227,22 @@ const usePad = create<IPadStore>((set, get) => ({
               });
             }
 
-            targetTrack.patterns.forEach((pattern) => {
-              const currentStep = pattern.steps[step % steps];
+            targetPattern.instruments.forEach((instrument) => {
+              const currentStep = instrument.steps[step % steps];
               if (currentStep.isChecked) {
-                const instrument = loadedInstrument[pattern.instrument.url];
-                instrument.connect(analyzer);
+                const targetInstrument =
+                  loadedInstrument[instrument.instrument.url];
+                targetInstrument.connect(analyzer);
                 analyzer.toDestination();
                 if (Object.keys(connectedEffector).length > 0) {
                   Object.entries(connectedEffector).forEach(([key, value]) => {
                     if (key === "reverb") {
-                      instrument.connect(reverb);
+                      targetInstrument.connect(reverb);
                       reverb.decay = value.decay;
                     }
                   });
                 }
-                instrument.start(time); // 오디오 재생
+                targetInstrument.start(time); // 오디오 재생
               }
             });
           }
@@ -253,18 +262,20 @@ const usePad = create<IPadStore>((set, get) => ({
     }
   },
   handleEffector: (effectorIndex: number) => {
-    const tracks = structuredClone(get().tracks);
-    const selectedTrackId = get().selectedTrackId;
-    const targetTrack = tracks.find((track) => track.id === selectedTrackId);
+    const patterns = structuredClone(get().patterns);
+    const selectedPatternId = get().selectedPatternId;
+    const targetPattern = patterns.find(
+      (pattern) => pattern.id === selectedPatternId
+    );
     const effectorList = useEffectorController.getState().effectorList;
     const targetEffector = effectorList[effectorIndex];
 
-    if (targetTrack) {
+    if (targetPattern) {
       if (targetEffector) {
-        targetTrack.effector = targetEffector;
+        targetPattern.effector = targetEffector;
 
         set(() => ({
-          tracks,
+          patterns,
         }));
       }
     }

@@ -6,30 +6,30 @@ export interface IStep {
   isChecked: boolean;
 }
 
-export interface ITrack {
-  trackName: string;
+export interface IPattern {
+  patternName: string;
   id: string;
-  patterns: IPadPattern[];
+  instruments: IPatternInstrument[];
   totalDuration: number;
   effector?: IEffector;
 }
 
-export interface IPadPattern {
+export interface IPatternInstrument {
   id: string;
   instrument: IInstrument;
   steps: IStep[];
 }
 
 export interface IPadStore {
-  tracks: ITrack[];
+  patterns: IPattern[];
   steps: number;
-  selectedTrackId: string;
-  selectedTrack: ITrack;
+  selectedPatternId: string;
+  selectedPattern: IPattern;
 
   padSequence: Tone.Sequence<number> | undefined;
   isPadPlaying: boolean;
   initPad: () => void;
-  addTrack: () => void;
+  addPattern: () => void;
 
   handleCheck: (
     trackIndex: number,
@@ -41,7 +41,7 @@ export interface IPadStore {
     trackIndex: number,
     patternIndex: number
   ) => void;
-  handleTrackSelect: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handlePatternSelect: (e: React.ChangeEvent<HTMLSelectElement>) => void;
 
   handlePadPlay: () => void;
   handleEffector: (effectorIndex: number) => void;
