@@ -21,23 +21,23 @@ const useInstrument = create<IInstrumentStore>((set) => ({
   ) => {
     set(() => ({ selectedIns: instrument }));
   },
-  loadAudio: async () => {
-    const loaders = instruments.map((sample) =>
-      new Tone.Player(sample.url).toDestination()
-    );
-    const loadedMedias = await Promise.all(loaders);
+    loadAudio: async () => {
+      const loaders = instruments.map((sample) =>
+        new Tone.Player(sample.url).toDestination()
+      );
+      const loadedMedias = await Promise.all(loaders);
 
-    console.log(loadedMedias, "loaded medias@");
-    const medias = instruments.reduce((acc, sample, index) => {
-      acc[sample.url] = loadedMedias[index];
-      return acc;
-    }, {} as ILoadedInstrument);
+      console.log(loadedMedias, "loaded medias@");
+      const medias = instruments.reduce((acc, sample, index) => {
+        acc[sample.url] = loadedMedias[index];
+        return acc;
+      }, {} as ILoadedInstrument);
 
-    await Tone.loaded().then(() => {
-      // 페이지 로드 시 한 번만 초기화
-      set(() => ({ loadedInstrument: medias }));
-    });
-  },
+      await Tone.loaded().then(() => {
+        // 페이지 로드 시 한 번만 초기화
+        set(() => ({ loadedInstrument: medias }));
+      });
+    },
 }));
 
 export default useInstrument;

@@ -18,5 +18,5 @@ export interface IInstrumentStore {
     instrument: IInstrument
   ) => void;
   loadAudio: () => void;
-  setLoadedInstrument: (loadedInstrument: ILoadedInstrument) => void;
+  
 }

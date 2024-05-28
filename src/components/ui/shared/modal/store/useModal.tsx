@@ -28,8 +28,8 @@ const useModal = create<IModalStore>((set, get) => ({
     PianoRoll: {
       title: "PianoRoll",
       path: "pianoRoll/PianoRoll.tsx",
-      width: 400,
-      height: 500,
+      width: 800,
+      height: 600,
       isVisible: false,
     },
   },
