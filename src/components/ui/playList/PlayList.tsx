@@ -150,6 +150,26 @@ const PlayList = () => {
                         left: `${pattern.x}px`,
                       }}
                     >
+                      <div
+                        style={{
+                          display: "flex",
+                          position: "absolute",
+                          height: "100%",
+                        }}
+                        className="grid"
+                      >
+                        {[...Array(measureWidth / 28)].map((_, index) => (
+                          <div
+                            key={index}
+                            style={{
+                              minWidth: `${28}px`,
+                              maxWidth: `${28}px`,
+                              borderRight: "1px solid black",
+                              height: "100%",
+                            }}
+                          ></div>
+                        ))}
+                      </div>
                       {playListTrack.instrument &&
                         playListTrack.instrument?.url !== "" && (
                           <div

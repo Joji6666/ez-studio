@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
+import * as Tone from "tone";
 import usePlayList from "../../../../playList/store/usePlayList";
 import "./style/piano_roll.scss";
+import { v1 } from "uuid";
 
 const generateNotes = () => {
   const notes: string[] = [];
@@ -30,10 +32,24 @@ const notes = generateNotes().reverse();
 
 const PianoRoll = () => {
   const [scrollX, setScrollX] = useState(0);
+  const [activeNote, setActiveNote] = useState<string | null>(null);
+  const [synth, setSynth] = useState<Tone.Synth<Tone.SynthOptions> | null>(
+    null
+  );
 
-  const { measureWidth, measures, measureBarMaxWidth } = usePlayList();
+  const { measureWidth } = usePlayList();
+
+  const handleActivePiano = (note: string) => {
+    if (synth) {
+      synth.triggerAttackRelease(note, "8n");
+      setActiveNote(note);
+    }
+  };
 
   useEffect(() => {
+    const synch = new Tone.Synth().toDestination();
+    setSynth(synch);
+
     const pianoRollMeasureBarWrapper = document.querySelector(
       ".piano-roll-measure-bar-wrapper"
     );
@@ -45,22 +61,33 @@ const PianoRoll = () => {
     }
   }, []);
 
+  useEffect(() => {
+    if (activeNote) {
+      setActiveNote(null);
+    }
+  }, [activeNote]);
+
   return (
     <div className="piano-roll-container">
       <div className="piano-roll-top-wrapper">
-        <div className="piano-roll-toolbar"></div>
+        <div className="piano-roll-toolbar">
+          <button>
+            <img
+              src={"icons/recording.svg"}
+              width={15}
+              height={15}
+              alt="recording"
+            />
+          </button>
+        </div>
         <div className="piano-roll-measure-bar-wrapper">
           <div
             className="piano-roll-measure-bar"
             style={{
-              width: `${
-                measureBarMaxWidth > measureWidth * 36
-                  ? measureBarMaxWidth
-                  : measureWidth * 36
-              }px`,
+              width: `${measureWidth * 12}px`,
             }}
           >
-            {[...Array(measures)].map((_, index) => (
+            {[...Array(12)].map((_, index) => (
               <div
                 key={index}
                 className="measure"
@@ -90,12 +117,19 @@ const PianoRoll = () => {
                 display: "flex",
                 alignItems: "center",
               }}
+              onClick={() => handleActivePiano(note)}
             >
               <p
                 style={{
                   height: "100%",
                   width: `100%`,
-                  backgroundColor: `${note.includes("#") ? "black" : "white"}`,
+                  backgroundColor: `${
+                    activeNote === note
+                      ? "red"
+                      : note.includes("#")
+                      ? "black"
+                      : "white"
+                  }`,
                   borderTop: `${
                     note.includes("E") || note.includes("B")
                       ? "1px solid black"
@@ -132,7 +166,7 @@ const PianoRoll = () => {
           ))}
         </div>
         <div className="piano-roll-step-wrapper" style={{ right: scrollX }}>
-          {[...Array(measures)].map((_, index) => (
+          {[...Array(12)].map((_, index) => (
             <div
               key={index}
               className="measure"
@@ -143,16 +177,16 @@ const PianoRoll = () => {
             >
               {notes.map((note) => (
                 <div
+                  className="note-grid"
+                  key={`${note}${v1()}`}
                   style={{
-                    backgroundColor: "darkgray",
                     width: "100%",
                     height: "20px",
                     borderBottom: "1px solid black",
                     borderRight: "1px solid black",
+                    boxShadow: "inset 0 2px 5px rgba(0, 0, 0, 0.3)",
                   }}
-                >
-                  {note}
-                </div>
+                ></div>
               ))}
             </div>
           ))}

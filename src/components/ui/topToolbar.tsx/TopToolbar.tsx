@@ -20,6 +20,10 @@ const TopToolbar = () => {
   return (
     <section className="top-toolbar-section">
       <div className="bpm-controller-wrapper">
+        <label>4/4</label>
+      </div>
+
+      <div className="bpm-controller-wrapper">
         <label>BPM</label>
         <input
           type="number"
@@ -31,7 +35,11 @@ const TopToolbar = () => {
       </div>
       <div className="note-value-controller">
         <label>NOTE</label>
-        <select name="noteValue" onChange={handleNoteValue} defaultValue={"8n"}>
+        <select
+          name="noteValue"
+          onChange={handleNoteValue}
+          defaultValue={"16n"}
+        >
           {noteValues.map((note) => (
             <option key={note.key} value={note.key}>
               {note.label}

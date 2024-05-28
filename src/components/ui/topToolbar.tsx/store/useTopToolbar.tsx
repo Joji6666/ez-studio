@@ -6,7 +6,7 @@ import usePlayList from "../../playList/store/usePlayList";
 const useTopToolbar = create<ITopToolbar>((set) => ({
   bpm: 120,
   analyzer: null,
-  noteValue: "8n",
+  noteValue: "16n",
   handleBpm: (e: React.ChangeEvent<HTMLInputElement>) => {
     Tone.Transport.bpm.value = Number(e.target.value);
 

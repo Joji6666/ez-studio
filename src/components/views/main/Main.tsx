@@ -25,6 +25,12 @@ const Main = () => {
     }
   };
 
+  const handleMouseLeave = () => {
+    if (logoRef.current) {
+      logoRef.current.style.transform = `perspective(350px) rotateY(0deg) rotateX(0deg)`;
+    }
+  };
+
   return (
     <main>
       <h1>EZ STUDIO</h1>
@@ -36,6 +42,7 @@ const Main = () => {
           height={500}
           alt="logo"
           onMouseMove={handleMouseMove}
+          onMouseLeave={handleMouseLeave}
         />
       </div>
 

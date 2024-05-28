@@ -228,8 +228,8 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
         if (!lastTime) lastTime = time; // 처음 프레임의 시간을 저장
         const deltaTime = time - lastTime; // 두 프레임 간의 시간 차이 계산
         lastTime = time; // 현재 프레임의 시간을 lastTime으로 업데이트
-
-        xPo += ((baseWidth * deltaTime) / stepDuration) * 2;
+        // 8n= *2
+        xPo += ((baseWidth * deltaTime) / stepDuration) * 4;
 
         const timelinebarElement = document.querySelector(".timeline-bar-line");
         if (timelinebarElement) {
@@ -527,9 +527,10 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
   },
 
   calculateMeasureWidth: (noteValue: string, baseWidth: number) => {
-    const convertNoteValue = Number(noteValue.replace("n", ""));
-    const widthPerStep = baseWidth * (convertNoteValue / 4);
-    return widthPerStep * convertNoteValue; // 한 마디의 길이 계산
+    // const convertNoteValue = Number(noteValue.replace("n", ""));
+    const widthPerStep = baseWidth * (4 / 4);
+
+    return widthPerStep * 4 * 4;
   },
 }));
 
