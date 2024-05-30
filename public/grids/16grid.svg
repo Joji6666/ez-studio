@@ -1,18 +1,18 @@
  <svg width="112" height="20" xmlns="http://www.w3.org/2000/svg">
-    <rect width="7" height="20" x="0" fill="darkgray" stroke="black" stroke-width="1"/>
-    <rect width="7" height="20" x="7" fill="lightgray" stroke="black" stroke-width="1"/>
-    <rect width="7" height="20" x="14" fill="darkgray" stroke="black" stroke-width="1"/>
-    <rect width="7" height="20" x="21" fill="lightgray" stroke="black" stroke-width="1"/>
-    <rect width="7" height="20" x="28" fill="darkgray" stroke="black" stroke-width="1"/>
-    <rect width="7" height="20" x="35" fill="lightgray" stroke="black" stroke-width="1"/>
-    <rect width="7" height="20" x="42" fill="darkgray" stroke="black" stroke-width="1"/>
-    <rect width="7" height="20" x="49" fill="lightgray" stroke="black" stroke-width="1"/>
-    <rect width="7" height="20" x="56" fill="darkgray" stroke="black" stroke-width="1"/>
-    <rect width="7" height="20" x="63" fill="lightgray" stroke="black" stroke-width="1"/>
-    <rect width="7" height="20" x="70" fill="darkgray" stroke="black" stroke-width="1"/>
-    <rect width="7" height="20" x="77" fill="lightgray" stroke="black" stroke-width="1"/>
-    <rect width="7" height="20" x="84" fill="darkgray" stroke="black" stroke-width="1"/>
-    <rect width="7" height="20" x="91" fill="lightgray" stroke="black" stroke-width="1"/>
-    <rect width="7" height="20" x="98" fill="darkgray" stroke="black" stroke-width="1"/>
-    <rect width="7" height="20" x="105" fill="lightgray" stroke="black" stroke-width="1"/>
+    <rect width="7" height="20" x="0" fill="#404040" stroke="black" stroke-width="1"/>
+    <rect width="7" height="20" x="7" fill="#808080" stroke="black" stroke-width="1"/>
+    <rect width="7" height="20" x="14" fill="#404040" stroke="black" stroke-width="1"/>
+    <rect width="7" height="20" x="21" fill="#808080" stroke="black" stroke-width="1"/>
+    <rect width="7" height="20" x="28" fill="#404040" stroke="black" stroke-width="1"/>
+    <rect width="7" height="20" x="35" fill="#808080" stroke="black" stroke-width="1"/>
+    <rect width="7" height="20" x="42" fill="#404040" stroke="black" stroke-width="1"/>
+    <rect width="7" height="20" x="49" fill="#808080" stroke="black" stroke-width="1"/>
+    <rect width="7" height="20" x="56" fill="#404040" stroke="black" stroke-width="1"/>
+    <rect width="7" height="20" x="63" fill="#808080" stroke="black" stroke-width="1"/>
+    <rect width="7" height="20" x="70" fill="#404040" stroke="black" stroke-width="1"/>
+    <rect width="7" height="20" x="77" fill="#808080" stroke="black" stroke-width="1"/>
+    <rect width="7" height="20" x="84" fill="#404040" stroke="black" stroke-width="1"/>
+    <rect width="7" height="20" x="91" fill="#808080" stroke="black" stroke-width="1"/>
+    <rect width="7" height="20" x="98" fill="#404040" stroke="black" stroke-width="1"/>
+    <rect width="7" height="20" x="105" fill="#808080" stroke="black" stroke-width="1"/>
   </svg>

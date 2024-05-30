@@ -5,6 +5,7 @@ import usePlayList from "../playList/store/usePlayList";
 import useEffectorController from "../shared/modal/components/effector/store/useEffectorController";
 
 import useModal from "../shared/modal/store/useModal";
+import { v1 } from "uuid";
 
 const Pad = () => {
   const {
@@ -12,12 +13,14 @@ const Pad = () => {
     selectedPatternId,
     isPadPlaying,
     addPattern,
+    addInstrument,
     initPad,
     handleCheck,
     handleDrop,
     handlePatternSelect,
     handlePadPlay,
     handleEffector,
+    handleInstrumentSelect,
   } = usePad();
   const { insertPattern } = usePlayList();
   const { effectorList } = useEffectorController();
@@ -95,7 +98,11 @@ const Pad = () => {
               <div key={pattern.id} className="pad-pattern-wrapper">
                 {pattern.instruments.map(
                   (instrument, instrumentIndex: number) => (
-                    <div className="instrument-wrapper" key={instrument.id}>
+                    <div
+                      className="instrument-wrapper"
+                      key={instrument.id}
+                      onClick={() => handleInstrumentSelect(instrument.id)}
+                    >
                       <div
                         className="selected-audio-wrapper"
                         onDrop={(e) =>
@@ -107,26 +114,60 @@ const Pad = () => {
                           instrument.instrument.name ?? "악기 선택"
                         }`}</span>
                       </div>
-                      <div className="checkbox-wrapper">
-                        {instrument.steps.map((step, stepIndex: number) => (
-                          <div key={step.id} className="checkbox-content">
-                            <input
-                              className="checkbox-input"
-                              id={step.id}
-                              type="checkbox"
-                              onChange={() =>
-                                handleCheck(
-                                  patternIndex,
-                                  instrumentIndex,
-                                  stepIndex
-                                )
-                              }
-                              checked={step.isChecked}
-                            />
-                            <label htmlFor={step.id}></label>
-                          </div>
-                        ))}
-                      </div>
+
+                      {instrument?.isPiano ? (
+                        <div
+                          className="pad-piano-wrapper"
+                          onClick={() => handleModal("PianoRoll", "open")}
+                        >
+                          {instrument.pianoSteps &&
+                            instrument.pianoSteps.notes.map((note) => (
+                              <div
+                                key={`note.noteName${v1()}`}
+                                style={{
+                                  display: "flex",
+                                  width: "100%",
+                                  height: "2px",
+                                }}
+                              >
+                                {note.noteValues.map((noteValue) => (
+                                  <div
+                                    key={v1()}
+                                    style={{
+                                      width: `${
+                                        noteValue === "16n" ? "8px" : "14px"
+                                      }`,
+                                      height: "2px",
+                                      backgroundColor: "lime",
+                                    }}
+                                  ></div>
+                                ))}
+                              </div>
+                            ))}
+                        </div>
+                      ) : (
+                        <div className="checkbox-wrapper">
+                          {instrument.steps.map((step, stepIndex: number) => (
+                            <div key={step.id} className="checkbox-content">
+                              <input
+                                className="checkbox-input"
+                                id={step.id}
+                                type="checkbox"
+                                onChange={() =>
+                                  handleCheck(
+                                    patternIndex,
+                                    instrumentIndex,
+                                    stepIndex
+                                  )
+                                }
+                                checked={step.isChecked}
+                              />
+                              <label htmlFor={step.id}></label>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+
                       <div className="effector-plugin-wrapper">
                         <img
                           src={"icons/plugin.svg"}
@@ -155,6 +196,9 @@ const Pad = () => {
               </div>
             )
         )}
+        <div>
+          <button onClick={addInstrument}>+ Add Instrument</button>
+        </div>
       </article>
     </section>
   );

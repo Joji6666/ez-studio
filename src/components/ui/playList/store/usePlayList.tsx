@@ -42,7 +42,7 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
     const { patterns, selectedPatternId } = usePad.getState();
     const playListTracks = structuredClone(get().playListTracks);
     const targetPlayListTrack = playListTracks.find(
-      (playListTrack) => playListTrack.trackId === selectedPatternId
+      (playListTrack) => playListTrack.patternId === selectedPatternId
     );
 
     const selectedPattern = patterns.find(
@@ -67,12 +67,12 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
     } else {
       if (selectedPattern) {
         const emptyTrack = playListTracks.find(
-          (playListTrack) => playListTrack.trackId === ""
+          (playListTrack) => playListTrack.patternId === ""
         );
 
         if (emptyTrack) {
           emptyTrack.trackName = selectedPattern.patternName;
-          emptyTrack.trackId = selectedPattern.id;
+          emptyTrack.patternId = selectedPattern.id;
           emptyTrack.patterns.push({
             id: v1(),
             length: selectedPattern.instruments.length,
@@ -99,7 +99,7 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
             ],
             height: 0,
             trackName: selectedPattern.patternName,
-            trackId: selectedPattern.id,
+            patternId: selectedPattern.id,
           };
 
           set((state) => ({
@@ -502,7 +502,7 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
         height: 0,
         trackName: "",
         patterns: [],
-        trackId: "",
+        patternId: "",
       };
 
       tracks.push(newTrack);

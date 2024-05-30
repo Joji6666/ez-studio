@@ -6,6 +6,7 @@ import type {
   IPatternInstrument,
   IPadStore,
   IPattern,
+  IPadPianoNote,
 } from "../util/pad_interface";
 import useInstrument from "../../instrumentSelector/store/useInstrument";
 import useTopToolbar from "../../topToolbar.tsx/store/useTopToolbar";
@@ -17,6 +18,7 @@ const usePad = create<IPadStore>((set, get) => ({
   steps: 16,
   loadedInstrument: {},
   selectedPatternId: "pattern1",
+  selectedInstrumentId: null,
   selectedPattern: {
     patternName: "",
     id: "",
@@ -36,22 +38,7 @@ const usePad = create<IPadStore>((set, get) => ({
       instruments: [
         {
           id: v1(),
-          instrument: instruments[0],
-          steps: [],
-        },
-        {
-          id: v1(),
-          instrument: instruments[1],
-          steps: [],
-        },
-        {
-          id: v1(),
-          instrument: instruments[2],
-          steps: [],
-        },
-        {
-          id: v1(),
-          instrument: instruments[3],
+          instrument: { url: "", name: "", group: "" },
           steps: [],
         },
       ],
@@ -71,6 +58,67 @@ const usePad = create<IPadStore>((set, get) => ({
       patterns: [...state.patterns, newPattern],
     }));
   },
+  addInstrument: () => {
+    const patterns = structuredClone(get().patterns);
+    const selectedPatternId = get().selectedPatternId;
+    const targetPattern = patterns.find(
+      (pattern) => pattern.id === selectedPatternId
+    );
+    if (targetPattern) {
+      const newOption: IPatternInstrument = {
+        id: v1(),
+        instrument: {
+          url: "",
+          name: "synth",
+          group: "synth",
+        },
+        isPiano: true,
+        steps: [],
+        pianoSteps: {
+          id: v1(),
+          notes: [],
+        },
+      };
+
+      const notes: IPadPianoNote[] = [];
+
+      const pitches: string[] = [
+        "C",
+        "C#",
+        "D",
+        "D#",
+        "E",
+        "F",
+        "F#",
+        "G",
+        "G#",
+        "A",
+        "A#",
+        "B",
+      ];
+
+      pitches.forEach((pitch) => {
+        for (let index = 0; index <= 10; index++) {
+          if (newOption.pianoSteps) {
+            notes.push({
+              noteName: `${pitch}${index}`,
+              noteValues: [],
+            });
+          }
+        }
+      });
+
+      notes.reverse();
+      if (newOption.pianoSteps) {
+        newOption.pianoSteps.notes = notes;
+      }
+
+      targetPattern.instruments.push(newOption);
+    }
+
+    set(() => ({ patterns }));
+  },
+
   initPad: () => {
     const basicPadSetup: IPatternInstrument[] = [
       {
@@ -279,6 +327,9 @@ const usePad = create<IPadStore>((set, get) => ({
         }));
       }
     }
+  },
+  handleInstrumentSelect: (instrumentId: string) => {
+    set(() => ({ selectedInstrumentId: instrumentId }));
   },
 }));
 

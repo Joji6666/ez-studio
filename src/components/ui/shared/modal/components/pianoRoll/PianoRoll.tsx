@@ -4,6 +4,7 @@ import * as Tone from "tone";
 import usePlayList from "../../../../playList/store/usePlayList";
 import "./style/piano_roll.scss";
 import { v1 } from "uuid";
+import usePad from "../../../../pad/store/usePad";
 
 const generateNotes = () => {
   const notes: string[] = [];
@@ -31,14 +32,35 @@ const generateNotes = () => {
 
 const notes = generateNotes().reverse();
 
+const closestMultipleOfSeven = (x: number) => {
+  const base = Math.floor(x / 7);
+
+  return base * 7;
+};
+
+interface INoteStatus {
+  [note: string]: INoteValue[];
+}
+
+interface INoteValue {
+  noteValue: string;
+  x: number;
+  duration: number;
+  id: string;
+}
+
 const PianoRoll = () => {
   const [scrollX, setScrollX] = useState(0);
   const [activeNote, setActiveNote] = useState<string | null>(null);
   const [synth, setSynth] = useState<Tone.Synth<Tone.SynthOptions> | null>(
     null
   );
+  const [noteStatus, setNoteStatus] = useState<INoteStatus>({});
+  const [isMove, setIsMove] = useState(false);
+  const [isIncrease, setIsIncrease] = useState(false);
 
   const { measureWidth } = usePlayList();
+  const { selectedPatternId, patterns, selectedInstrumentId } = usePad();
 
   const handleActivePiano = (note: string) => {
     if (synth) {
@@ -51,8 +73,96 @@ const PianoRoll = () => {
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,
     note: string
   ) => {
-    console.log(e);
-    console.log(note);
+    let pass = true;
+    console.log(note, "note @@@@");
+    const targetElement = document.querySelector(`#note-grid-${note}`);
+    console.log(targetElement, "target Element@");
+    let xPosition = 0;
+    if (targetElement) {
+      const childNodes = targetElement.childNodes;
+      const rect = targetElement.getBoundingClientRect();
+      const x = e.clientX - rect.left; // 마우스 클릭 위치의 x 좌표
+
+      xPosition = closestMultipleOfSeven(x);
+
+      childNodes.forEach((childNode) => {
+        const childElement = childNode as HTMLElement;
+        const childRect = childElement.getBoundingClientRect();
+        const childX = childRect.left - rect.left; // childNode의 상대적인 x 좌표
+        const childWidth = childRect.width;
+
+        // 클릭한 x 좌표가 childNode의 범위 내에 있는지 확인
+        if (x >= childX && x <= childX + childWidth) {
+          pass = false;
+        }
+      });
+    }
+
+    if (pass) {
+      const tempPatterns = structuredClone(patterns);
+      const targetPattern = tempPatterns.find(
+        (pattern) => pattern.id === selectedPatternId
+      );
+
+      if (targetPattern) {
+        const targetInstrument = targetPattern.instruments.find(
+          (instrument) => instrument.id === selectedInstrumentId
+        );
+        if (
+          targetInstrument &&
+          targetInstrument.pianoSteps &&
+          targetInstrument.isPiano
+        ) {
+          const targetNote = targetInstrument.pianoSteps.notes.find(
+            (targetNote) => targetNote.noteName === note
+          );
+
+          if (targetNote) {
+            targetNote.noteValues.push("16n");
+          }
+          usePad.setState(() => ({ patterns: tempPatterns }));
+        }
+      }
+
+      const targetNote = note.includes("minor")
+        ? note.replace("minor", "#")
+        : note;
+
+      console.log(targetNote, "targetNote@");
+
+      console.log(noteStatus, "note Status@");
+      noteStatus[targetNote].push({
+        noteValue: "16n",
+        x: xPosition,
+        duration: 0,
+        id: v1(),
+      });
+    }
+  };
+
+  const handleNoteClick = (
+    e: React.MouseEvent<HTMLDivElement, MouseEvent>,
+    id: string
+  ) => {
+    const targetNoteElement = document.querySelector(`#${id}`);
+
+    if (targetNoteElement) {
+      const rect = targetNoteElement.getBoundingClientRect();
+      const clickX = e.clientX;
+      const elementRightX = rect.right;
+
+      // 요소의 오른쪽 끝에서 10px 이내를 클릭한 경우로 간주
+      const threshold = 2;
+      if (clickX >= elementRightX - threshold) {
+        setIsIncrease(true);
+        setIsMove(false);
+        console.log("Clicked near the right edge of the element");
+      } else {
+        setIsIncrease(false);
+        setIsMove(true);
+        console.log("Clicked inside the element but not near the right edge");
+      }
+    }
   };
 
   useEffect(() => {
@@ -68,6 +178,14 @@ const PianoRoll = () => {
         setScrollX(pianoRollMeasureBarWrapper.scrollLeft);
       });
     }
+
+    const newNotes: INoteStatus = {};
+
+    notes.forEach((note) => {
+      newNotes[note] = [];
+    });
+
+    setNoteStatus(newNotes);
   }, []);
 
   useEffect(() => {
@@ -189,12 +307,37 @@ const PianoRoll = () => {
               width: `${measureWidth * 12}px`,
             }}
           >
-            {notes.map((note) => (
+            {Object.entries(noteStatus).map(([key, value]) => (
               <div
-                onClick={(e) => handleGridClick(e, note)}
+                onClick={(e) =>
+                  handleGridClick(
+                    e,
+                    key.includes("#") ? `${key.replace("#", "minor")}` : key
+                  )
+                }
                 className="note-grid"
-                key={`${note}${v1()}`}
-              ></div>
+                key={`${key}${v1()}`}
+                id={`note-grid-${
+                  key.includes("#") ? `${key.replace("#", "minor")}` : key
+                }`}
+              >
+                {value.map((noteValue) => (
+                  <div
+                    id={noteValue.id}
+                    key={noteValue.id}
+                    style={{
+                      width: `${
+                        noteValue.noteValue === "16n" ? "7px" : "14px"
+                      }`,
+                      height: "20px",
+                      backgroundColor: "lime",
+                      position: "absolute",
+                      left: noteValue.x,
+                    }}
+                    onClick={(e) => handleNoteClick(e, noteValue.id)}
+                  ></div>
+                ))}
+              </div>
             ))}
           </div>
         </div>

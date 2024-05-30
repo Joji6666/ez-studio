@@ -6,6 +6,16 @@ export interface IStep {
   isChecked: boolean;
 }
 
+export interface IPadPianoStep {
+  id: string;
+  notes: IPadPianoNote[];
+}
+
+export interface IPadPianoNote {
+  noteName: string;
+  noteValues: string[];
+}
+
 export interface IPattern {
   patternName: string;
   id: string;
@@ -18,6 +28,8 @@ export interface IPatternInstrument {
   id: string;
   instrument: IInstrument;
   steps: IStep[];
+  isPiano?: boolean;
+  pianoSteps?: IPadPianoStep;
 }
 
 export interface IPadStore {
@@ -25,12 +37,12 @@ export interface IPadStore {
   steps: number;
   selectedPatternId: string;
   selectedPattern: IPattern;
-
+  selectedInstrumentId: string | null;
   padSequence: Tone.Sequence<number> | undefined;
   isPadPlaying: boolean;
   initPad: () => void;
   addPattern: () => void;
-
+  addInstrument: () => void;
   handleCheck: (
     trackIndex: number,
     patternIndex: number,
@@ -45,4 +57,5 @@ export interface IPadStore {
 
   handlePadPlay: () => void;
   handleEffector: (effectorIndex: number) => void;
+  handleInstrumentSelect: (instrumentId: string) => void;
 }

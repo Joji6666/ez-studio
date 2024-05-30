@@ -47,7 +47,7 @@ export interface IPlayListTrack {
   trackName: string;
   patterns: IPattern[];
   instrument?: IInstrument;
-  trackId: string;
+  patternId: string;
 }
 
 export interface IPattern {

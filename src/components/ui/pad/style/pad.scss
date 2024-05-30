@@ -48,13 +48,13 @@ select {
 .pad-article {
   display: flex;
   flex-direction: column;
-  height: 200px;
+  height: 400px;
   overflow-y: auto;
   background-color: rgb(90, 89, 89);
 }
 
 .pad-pattern-wrapper {
-  height: 100%;
+  height: 90%;
   display: flex;
   flex-direction: column;
   margin: 0;
@@ -84,6 +84,14 @@ select {
       }
     }
   }
+}
+
+.pad-piano-wrapper {
+  width: 80%;
+  height: 100%;
+  border: 1px solid cyan;
+  display: flex;
+  flex-direction: column;
 }
 
 .checkbox-wrapper {
