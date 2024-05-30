@@ -58,6 +58,9 @@ const PianoRoll = () => {
   const [noteStatus, setNoteStatus] = useState<INoteStatus>({});
   const [isMove, setIsMove] = useState(false);
   const [isIncrease, setIsIncrease] = useState(false);
+  const [selectedNoteId, setSelectedNoteId] = useState<string | null>("");
+  const [selectedOctave, setSelectedOctave] = useState<string | null>(null);
+  const [dragStartX, setDragStartX] = useState(0);
 
   const { measureWidth } = usePlayList();
   const { selectedPatternId, patterns, selectedInstrumentId } = usePad();
@@ -73,84 +76,87 @@ const PianoRoll = () => {
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,
     note: string
   ) => {
-    let pass = true;
-    console.log(note, "note @@@@");
-    const targetElement = document.querySelector(`#note-grid-${note}`);
-    console.log(targetElement, "target Element@");
-    let xPosition = 0;
-    if (targetElement) {
-      const childNodes = targetElement.childNodes;
-      const rect = targetElement.getBoundingClientRect();
-      const x = e.clientX - rect.left; // 마우스 클릭 위치의 x 좌표
+    if (!isMove && !isIncrease) {
+      let pass = true;
 
-      xPosition = closestMultipleOfSeven(x);
+      const targetElement = document.querySelector(`#note-grid-${note}`);
 
-      childNodes.forEach((childNode) => {
-        const childElement = childNode as HTMLElement;
-        const childRect = childElement.getBoundingClientRect();
-        const childX = childRect.left - rect.left; // childNode의 상대적인 x 좌표
-        const childWidth = childRect.width;
+      let xPosition = 0;
+      if (targetElement) {
+        const childNodes = targetElement.childNodes;
+        const rect = targetElement.getBoundingClientRect();
+        const x = e.clientX - rect.left; // 마우스 클릭 위치의 x 좌표
 
-        // 클릭한 x 좌표가 childNode의 범위 내에 있는지 확인
-        if (x >= childX && x <= childX + childWidth) {
-          pass = false;
-        }
-      });
-    }
+        xPosition = closestMultipleOfSeven(x);
 
-    if (pass) {
-      const tempPatterns = structuredClone(patterns);
-      const targetPattern = tempPatterns.find(
-        (pattern) => pattern.id === selectedPatternId
-      );
+        childNodes.forEach((childNode) => {
+          const childElement = childNode as HTMLElement;
+          const childRect = childElement.getBoundingClientRect();
+          const childX = childRect.left - rect.left; // childNode의 상대적인 x 좌표
+          const childWidth = childRect.width;
 
-      if (targetPattern) {
-        const targetInstrument = targetPattern.instruments.find(
-          (instrument) => instrument.id === selectedInstrumentId
-        );
-        if (
-          targetInstrument &&
-          targetInstrument.pianoSteps &&
-          targetInstrument.isPiano
-        ) {
-          const targetNote = targetInstrument.pianoSteps.notes.find(
-            (targetNote) => targetNote.noteName === note
-          );
-
-          if (targetNote) {
-            targetNote.noteValues.push("16n");
+          // 클릭한 x 좌표가 childNode의 범위 내에 있는지 확인
+          if (x >= childX && x <= childX + childWidth) {
+            pass = false;
           }
-          usePad.setState(() => ({ patterns: tempPatterns }));
-        }
+        });
       }
 
-      const targetNote = note.includes("minor")
-        ? note.replace("minor", "#")
-        : note;
+      if (pass) {
+        const tempPatterns = structuredClone(patterns);
+        const targetPattern = tempPatterns.find(
+          (pattern) => pattern.id === selectedPatternId
+        );
 
-      console.log(targetNote, "targetNote@");
+        if (targetPattern) {
+          const targetInstrument = targetPattern.instruments.find(
+            (instrument) => instrument.id === selectedInstrumentId
+          );
+          if (
+            targetInstrument &&
+            targetInstrument.pianoSteps &&
+            targetInstrument.isPiano
+          ) {
+            const targetNote = targetInstrument.pianoSteps.notes.find(
+              (targetNote) => targetNote.noteName === note
+            );
 
-      console.log(noteStatus, "note Status@");
-      noteStatus[targetNote].push({
-        noteValue: "16n",
-        x: xPosition,
-        duration: 0,
-        id: v1(),
-      });
+            if (targetNote) {
+              targetNote.noteValues.push("16n");
+            }
+            usePad.setState(() => ({ patterns: tempPatterns }));
+          }
+        }
+
+        const targetNote = note.includes("minor")
+          ? note.replace("minor", "#")
+          : note;
+
+        noteStatus[targetNote].push({
+          noteValue: "16n",
+          x: xPosition,
+          duration: 0,
+          id: v1(),
+        });
+      }
     }
   };
 
-  const handleNoteClick = (
+  const handleMouseDown = (
     e: React.MouseEvent<HTMLDivElement, MouseEvent>,
-    id: string
+    id: string,
+    key: string,
+    targetNote: INoteValue
   ) => {
     const targetNoteElement = document.querySelector(`#${id}`);
+    setSelectedNoteId(id);
+    setSelectedOctave(key);
 
     if (targetNoteElement) {
       const rect = targetNoteElement.getBoundingClientRect();
       const clickX = e.clientX;
       const elementRightX = rect.right;
-
+      setDragStartX(e.clientX - targetNote.x);
       // 요소의 오른쪽 끝에서 10px 이내를 클릭한 경우로 간주
       const threshold = 2;
       if (clickX >= elementRightX - threshold) {
@@ -163,6 +169,30 @@ const PianoRoll = () => {
         console.log("Clicked inside the element but not near the right edge");
       }
     }
+  };
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (isMove && selectedNoteId && selectedOctave) {
+      const tempNoteStatus = structuredClone(noteStatus);
+      const targetNote = tempNoteStatus[selectedOctave].find(
+        (note) => note.id === selectedNoteId
+      );
+
+      const newElementX = e.clientX - dragStartX; // 새로운 x 위치 계산
+
+      if (targetNote) {
+        targetNote.x = newElementX;
+
+        setNoteStatus(tempNoteStatus);
+      }
+    }
+  };
+
+  const handleMouseUp = () => {
+    setSelectedNoteId(null);
+    setSelectedOctave(null);
+    setIsMove(false);
+    setIsIncrease(false);
   };
 
   useEffect(() => {
@@ -320,6 +350,8 @@ const PianoRoll = () => {
                 id={`note-grid-${
                   key.includes("#") ? `${key.replace("#", "minor")}` : key
                 }`}
+                onMouseMove={(e) => handleMouseMove(e)}
+                onMouseUp={handleMouseUp}
               >
                 {value.map((noteValue) => (
                   <div
@@ -334,7 +366,9 @@ const PianoRoll = () => {
                       position: "absolute",
                       left: noteValue.x,
                     }}
-                    onClick={(e) => handleNoteClick(e, noteValue.id)}
+                    onMouseDown={(e) =>
+                      handleMouseDown(e, noteValue.id, key, noteValue)
+                    }
                   ></div>
                 ))}
               </div>
