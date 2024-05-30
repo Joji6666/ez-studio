@@ -186,6 +186,23 @@ const PianoRoll = () => {
         setNoteStatus(tempNoteStatus);
       }
     }
+
+    if (isIncrease && selectedNoteId && selectedOctave) {
+      const tempNoteStatus = structuredClone(noteStatus);
+      const targetNote = tempNoteStatus[selectedOctave].find(
+        (note) => note.id === selectedNoteId
+      );
+
+      const newElementX = e.clientX - dragStartX; // 새로운 x 위치 계산
+
+      if (newElementX > dragStartX + 7) {
+        if (targetNote) {
+          targetNote.noteValue = "8n";
+
+          setNoteStatus(tempNoteStatus);
+        }
+      }
+    }
   };
 
   const handleMouseUp = () => {
@@ -365,6 +382,7 @@ const PianoRoll = () => {
                       backgroundColor: "lime",
                       position: "absolute",
                       left: noteValue.x,
+                      zIndex: 888,
                     }}
                     onMouseDown={(e) =>
                       handleMouseDown(e, noteValue.id, key, noteValue)
