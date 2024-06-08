@@ -1,7 +1,20 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { GoogleOAuthProvider } from "@react-oauth/google";
+import axios from "axios";
 
 const GoogleLoginButton = () => {
+  const handleGoogleLogin = async (credential: string) => {
+    console.log(credential, "credentail");
+    const res = await axios.post(
+      "http://localhost:8333/api/auth/login/google",
+      credential
+    );
+
+    if (res) {
+      localStorage.setItem("token", res.data);
+      console.log(res, "google login res");
+    }
+  };
   return (
     <>
       <GoogleOAuthProvider
@@ -11,7 +24,9 @@ const GoogleLoginButton = () => {
       >
         <GoogleLogin
           onSuccess={(res) => {
-            console.log(res);
+            if (res && res.credential) {
+              handleGoogleLogin(res.credential);
+            }
           }}
         />
       </GoogleOAuthProvider>
