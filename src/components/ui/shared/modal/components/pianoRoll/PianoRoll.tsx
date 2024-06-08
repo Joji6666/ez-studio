@@ -148,7 +148,7 @@ const PianoRoll = () => {
     key: string,
     targetNote: INoteValue
   ) => {
-    const targetNoteElement = document.querySelector(`#${id}`);
+    const targetNoteElement = document.getElementById(id);
     setSelectedNoteId(id);
     setSelectedOctave(key);
 
@@ -198,6 +198,16 @@ const PianoRoll = () => {
       if (newElementX > dragStartX + 7) {
         if (targetNote) {
           targetNote.noteValue = "8n";
+
+          setNoteStatus(tempNoteStatus);
+        }
+      }
+      console.log(dragStartX, "drag start@");
+      console.log(newElementX, "nelw ele");
+
+      if (newElementX > dragStartX + 14) {
+        if (targetNote) {
+          targetNote.noteValue = "4n";
 
           setNoteStatus(tempNoteStatus);
         }
@@ -376,7 +386,11 @@ const PianoRoll = () => {
                     key={noteValue.id}
                     style={{
                       width: `${
-                        noteValue.noteValue === "16n" ? "7px" : "14px"
+                        noteValue.noteValue === "16n"
+                          ? "7px"
+                          : noteValue.noteValue === "8n"
+                          ? "14px"
+                          : "21px"
                       }`,
                       height: "20px",
                       backgroundColor: "lime",

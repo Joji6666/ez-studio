@@ -6,11 +6,7 @@ const Main = () => {
   const nav = useNavigate();
 
   const handleNav = (key: string) => {
-    if (key === "start") {
-      nav("/studio");
-    } else {
-      nav("tutorial");
-    }
+    nav(`/${key}`);
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
@@ -47,6 +43,9 @@ const Main = () => {
       </div>
 
       <div className="main-button-wrapper">
+        <button type="button" onClick={() => handleNav("login")}>
+          Login
+        </button>
         <button type="button" onClick={() => handleNav("start")}>
           Start
         </button>
