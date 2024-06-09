@@ -1,6 +1,10 @@
 import * as Tone from "tone";
 import { create } from "zustand";
-import { ITopToolbar } from "../util/top_toolbar_interface";
+import {
+  IProject,
+  IProjectResponse,
+  ITopToolbar,
+} from "../util/top_toolbar_interface";
 import usePlayList from "../../playList/store/usePlayList";
 import usePad from "../../pad/store/usePad";
 import useEffectorController from "../../shared/modal/components/effector/store/useEffectorController";
@@ -11,6 +15,7 @@ const useTopToolbar = create<ITopToolbar>((set) => ({
   bpm: 120,
   analyzer: null,
   noteValue: "16n",
+  projects: [],
   handleBpm: (e: React.ChangeEvent<HTMLInputElement>) => {
     Tone.Transport.bpm.value = Number(e.target.value);
 
@@ -69,6 +74,51 @@ const useTopToolbar = create<ITopToolbar>((set) => ({
 
     if (res) {
       console.log(res, "save Res!");
+    }
+  },
+  getProjects: async () => {
+    const loginInfo = useAuth.getState().loginInfo;
+
+    const res = await axios.get(
+      `http://localhost:8333/api/project/user/${loginInfo.id}`
+    );
+
+    if (res) {
+      const projectDatas: IProject[] = [];
+
+      res.data.forEach((data: IProjectResponse) => {
+        const parsedProjectData = JSON.parse(data.projectData);
+        const newData: IProject = {
+          id: data.id,
+          projectName: data.projectName,
+          effectorList: parsedProjectData.effectorList,
+          playListTracks: parsedProjectData.playListTracks,
+          patterns: parsedProjectData.patterns,
+        };
+
+        projectDatas.push(newData);
+      });
+
+      if (res.data.length > 0) {
+        const parsedProjectData = JSON.parse(res.data[0].projectData);
+
+        console.log(parsedProjectData, "paresd");
+        usePad.setState((prev) => ({
+          ...prev,
+          patterns: parsedProjectData.patterns,
+          selectedPatternId: parsedProjectData.patterns[0].id,
+        }));
+        usePlayList.setState((prev) => ({
+          ...prev,
+          playListTracks: parsedProjectData.playListTracks,
+        }));
+        useEffectorController.setState((prev) => ({
+          ...prev,
+          effectorList: parsedProjectData.effectorList,
+        }));
+      }
+
+      set((prev) => ({ ...prev, projects: projectDatas }));
     }
   },
 }));

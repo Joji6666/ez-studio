@@ -3,11 +3,15 @@ import usePlayList from "../playList/store/usePlayList";
 import AudioVisualizer from "./AudioVisualizer";
 import useTopToolbar from "./store/useTopToolbar";
 import useModal from "../shared/modal/store/useModal";
+import useAuth from "../../views/login/store/useAuth";
+import { useEffect } from "react";
 
 const TopToolbar = () => {
-  const { handleBpm, handleNoteValue, handleSave } = useTopToolbar();
+  const { projects, getProjects, handleBpm, handleNoteValue, handleSave } =
+    useTopToolbar();
   const { isPlayListPlaying, handleStart, handleTimelineReset } = usePlayList();
   const { handleModal } = useModal();
+  const { loginInfo } = useAuth();
   const noteValues: { label: string; key: string }[] = [
     { label: "1n", key: "1n" },
     { label: "2n", key: "2n" },
@@ -17,8 +21,22 @@ const TopToolbar = () => {
     { label: "32n", key: "32n" },
   ];
 
+  useEffect(() => {
+    if (loginInfo.id > 0) {
+      getProjects();
+    }
+  }, [loginInfo]);
+
   return (
     <section className="top-toolbar-section">
+      <div className="project-select-wrapper">
+        <select>
+          {projects.map((project) => (
+            <option key={project.id}>{project.projectName}</option>
+          ))}
+        </select>
+      </div>
+
       <div className="bpm-controller-wrapper">
         <label>4/4</label>
       </div>

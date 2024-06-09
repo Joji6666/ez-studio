@@ -17,7 +17,6 @@ const GoogleLoginButton = () => {
     if (res) {
       localStorage.setItem("token", res.data.token);
       setLoginInfo(res.data.userId);
-      console.log(res, "google login res");
       nav("/studio");
     }
   };
