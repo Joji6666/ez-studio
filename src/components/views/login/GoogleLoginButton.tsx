@@ -1,18 +1,24 @@
 import { GoogleLogin } from "@react-oauth/google";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import axios from "axios";
+import useAuth from "./store/useAuth";
+import { useNavigate } from "react-router-dom";
 
 const GoogleLoginButton = () => {
+  const { setLoginInfo } = useAuth();
+  const nav = useNavigate();
+
   const handleGoogleLogin = async (credential: string) => {
-    console.log(credential, "credentail");
     const res = await axios.post(
       "http://localhost:8333/api/auth/login/google",
       credential
     );
 
     if (res) {
-      localStorage.setItem("token", res.data);
+      localStorage.setItem("token", res.data.token);
+      setLoginInfo(res.data.userId);
       console.log(res, "google login res");
+      nav("/studio");
     }
   };
   return (
@@ -23,6 +29,10 @@ const GoogleLoginButton = () => {
         }
       >
         <GoogleLogin
+          text="signin"
+          theme="outline"
+          shape="square"
+          size="large"
           onSuccess={(res) => {
             if (res && res.credential) {
               handleGoogleLogin(res.credential);

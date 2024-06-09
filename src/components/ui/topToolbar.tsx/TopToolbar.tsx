@@ -5,7 +5,7 @@ import useTopToolbar from "./store/useTopToolbar";
 import useModal from "../shared/modal/store/useModal";
 
 const TopToolbar = () => {
-  const { handleBpm, handleNoteValue } = useTopToolbar();
+  const { handleBpm, handleNoteValue, handleSave } = useTopToolbar();
   const { isPlayListPlaying, handleStart, handleTimelineReset } = usePlayList();
   const { handleModal } = useModal();
   const noteValues: { label: string; key: string }[] = [
@@ -77,6 +77,12 @@ const TopToolbar = () => {
             height={40}
             alt="play-btn"
           />
+        </button>
+      </div>
+
+      <div className="save-icon-wrapper">
+        <button onClick={handleSave}>
+          <img src={"icons/save.svg"} width={40} height={40} alt="save-btn" />
         </button>
       </div>
 

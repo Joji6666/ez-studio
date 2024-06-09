@@ -46,7 +46,7 @@ const Main = () => {
         <button type="button" onClick={() => handleNav("login")}>
           Login
         </button>
-        <button type="button" onClick={() => handleNav("start")}>
+        <button type="button" onClick={() => handleNav("studio")}>
           Start
         </button>
         <button type="button" onClick={() => handleNav("tutorial")}>

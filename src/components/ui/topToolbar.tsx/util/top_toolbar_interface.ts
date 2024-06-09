@@ -6,4 +6,5 @@ export interface ITopToolbar {
   noteValue: string;
   handleBpm: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleNoteValue: (e: React.ChangeEvent<HTMLSelectElement>) => void;
+  handleSave: () => void;
 }

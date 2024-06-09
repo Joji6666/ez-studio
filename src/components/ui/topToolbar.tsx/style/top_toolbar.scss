@@ -50,4 +50,15 @@
       background-color: gray;
     }
   }
+
+  .save-icon-wrapper {
+    border: 1px solid lime;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    button {
+      background-color: gray;
+    }
+  }
 }
