@@ -16,6 +16,7 @@ const useTopToolbar = create<ITopToolbar>((set) => ({
   analyzer: null,
   noteValue: "16n",
   projects: [],
+  selectedProjectId: 0,
   handleBpm: (e: React.ChangeEvent<HTMLInputElement>) => {
     Tone.Transport.bpm.value = Number(e.target.value);
 
@@ -46,8 +47,10 @@ const useTopToolbar = create<ITopToolbar>((set) => ({
     const playListTracks = usePlayList.getState().playListTracks;
     const effectorList = useEffectorController.getState().effectorList;
     const loginInfo = useAuth.getState().loginInfo;
+    // const selectedProjectId = get().selectedProjectId;
 
     const params = {
+      id: 1,
       projectData: JSON.stringify({
         patterns,
         playListTracks,
@@ -120,6 +123,9 @@ const useTopToolbar = create<ITopToolbar>((set) => ({
 
       set((prev) => ({ ...prev, projects: projectDatas }));
     }
+  },
+  handleProject: (id: number) => {
+    set((prev) => ({ ...prev, selectedProjectId: id }));
   },
 }));
 

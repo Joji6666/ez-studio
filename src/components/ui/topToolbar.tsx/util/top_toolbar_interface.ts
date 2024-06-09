@@ -10,10 +10,12 @@ export interface ITopToolbar {
   analyzer: null | Tone.Analyser;
   noteValue: string;
   projects: IProject[];
+  selectedProjectId: number;
   handleBpm: (e: React.ChangeEvent<HTMLInputElement>) => void;
   handleNoteValue: (e: React.ChangeEvent<HTMLSelectElement>) => void;
   handleSave: () => void;
   getProjects: () => void;
+  handleProject:(id:number)=>void
 }
 
 export interface IProject {
