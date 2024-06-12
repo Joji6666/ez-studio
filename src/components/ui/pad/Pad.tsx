@@ -128,17 +128,18 @@ const Pad = () => {
                                   display: "flex",
                                   width: "100%",
                                   height: "2px",
+                                  position: "relative",
                                 }}
                               >
                                 {note.noteValues.map((noteValue) => (
                                   <div
                                     key={v1()}
                                     style={{
-                                      width: `${
-                                        noteValue === "16n" ? "8px" : "14px"
-                                      }`,
+                                      width: `${noteValue.width}px`,
                                       height: "2px",
                                       backgroundColor: "lime",
+                                      position: "absolute",
+                                      left: noteValue.x,
                                     }}
                                   ></div>
                                 ))}

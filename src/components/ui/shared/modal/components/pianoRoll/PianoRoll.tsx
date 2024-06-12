@@ -5,6 +5,7 @@ import usePlayList from "../../../../playList/store/usePlayList";
 import "./style/piano_roll.scss";
 import { v1 } from "uuid";
 import usePad from "../../../../pad/store/usePad";
+import { INoteStatus, INoteValue } from "./util/piano_interface";
 
 const generateNotes = () => {
   const notes: string[] = [];
@@ -38,17 +39,6 @@ const closestMultipleOfSeven = (x: number) => {
   return base * 7;
 };
 
-interface INoteStatus {
-  [note: string]: INoteValue[];
-}
-
-interface INoteValue {
-  noteValue: string;
-  x: number;
-  duration: number;
-  id: string;
-}
-
 const PianoRoll = () => {
   const [scrollX, setScrollX] = useState(0);
   const [activeNote, setActiveNote] = useState<string | null>(null);
@@ -58,6 +48,7 @@ const PianoRoll = () => {
   const [noteStatus, setNoteStatus] = useState<INoteStatus>({});
   const [isMove, setIsMove] = useState(false);
   const [isIncrease, setIsIncrease] = useState(false);
+  const [isMouseDown, setIsMouseDown] = useState(false);
   const [selectedNoteId, setSelectedNoteId] = useState<string | null>("");
   const [selectedOctave, setSelectedOctave] = useState<string | null>(null);
   const [dragStartX, setDragStartX] = useState(0);
@@ -107,7 +98,7 @@ const PianoRoll = () => {
         const targetPattern = tempPatterns.find(
           (pattern) => pattern.id === selectedPatternId
         );
-
+        const newId = v1();
         if (targetPattern) {
           const targetInstrument = targetPattern.instruments.find(
             (instrument) => instrument.id === selectedInstrumentId
@@ -122,7 +113,13 @@ const PianoRoll = () => {
             );
 
             if (targetNote) {
-              targetNote.noteValues.push("16n");
+              targetNote.noteValues.push({
+                noteValue: "16n",
+                x: xPosition,
+                duration: 0,
+                id: newId,
+                width: 8,
+              });
             }
             usePad.setState(() => ({ patterns: tempPatterns }));
           }
@@ -132,12 +129,19 @@ const PianoRoll = () => {
           ? note.replace("minor", "#")
           : note;
 
-        noteStatus[targetNote].push({
-          noteValue: "16n",
-          x: xPosition,
-          duration: 0,
-          id: v1(),
-        });
+        setNoteStatus((prev) => ({
+          ...prev,
+          [targetNote]: [
+            ...prev[targetNote],
+            {
+              noteValue: "16n",
+              x: xPosition,
+              duration: 0,
+              id: newId,
+              width: 8,
+            },
+          ],
+        }));
       }
     }
   };
@@ -151,6 +155,7 @@ const PianoRoll = () => {
     const targetNoteElement = document.getElementById(id);
     setSelectedNoteId(id);
     setSelectedOctave(key);
+    setIsMouseDown(true);
 
     if (targetNoteElement) {
       const rect = targetNoteElement.getBoundingClientRect();
@@ -158,7 +163,7 @@ const PianoRoll = () => {
       const elementRightX = rect.right;
       setDragStartX(e.clientX - targetNote.x);
       // 요소의 오른쪽 끝에서 10px 이내를 클릭한 경우로 간주
-      const threshold = 2;
+      const threshold = 3.5;
       if (clickX >= elementRightX - threshold) {
         setIsIncrease(true);
         setIsMove(false);
@@ -172,6 +177,8 @@ const PianoRoll = () => {
   };
 
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement, MouseEvent>) => {
+    if (!isMouseDown) return;
+
     if (isMove && selectedNoteId && selectedOctave) {
       const tempNoteStatus = structuredClone(noteStatus);
       const targetNote = tempNoteStatus[selectedOctave].find(
@@ -183,6 +190,38 @@ const PianoRoll = () => {
       if (targetNote) {
         targetNote.x = newElementX;
 
+        const tempPatterns = structuredClone(patterns);
+        const targetPattern = tempPatterns.find(
+          (pattern) => pattern.id === selectedPatternId
+        );
+
+        if (targetPattern) {
+          const targetInstrument = targetPattern.instruments.find(
+            (instrument) => instrument.id === selectedInstrumentId
+          );
+          if (
+            targetInstrument &&
+            targetInstrument.pianoSteps &&
+            targetInstrument.isPiano
+          ) {
+            const patternTargetNote = targetInstrument.pianoSteps.notes.find(
+              (patternTargetNote) =>
+                patternTargetNote.noteName === selectedOctave
+            );
+
+            if (patternTargetNote) {
+              const targetNoteValue = patternTargetNote.noteValues.find(
+                (noteValue) => noteValue.id === selectedNoteId
+              );
+
+              if (targetNoteValue) {
+                targetNoteValue.x = newElementX;
+              }
+            }
+            usePad.setState(() => ({ patterns: tempPatterns }));
+          }
+        }
+
         setNoteStatus(tempNoteStatus);
       }
     }
@@ -193,21 +232,41 @@ const PianoRoll = () => {
         (note) => note.id === selectedNoteId
       );
 
-      const newElementX = e.clientX - dragStartX; // 새로운 x 위치 계산
-
-      if (newElementX > dragStartX + 7) {
+      if (e.clientX > dragStartX) {
         if (targetNote) {
-          targetNote.noteValue = "8n";
+          targetNote.width = targetNote.width + 1;
 
-          setNoteStatus(tempNoteStatus);
-        }
-      }
-      console.log(dragStartX, "drag start@");
-      console.log(newElementX, "nelw ele");
+          const tempPatterns = structuredClone(patterns);
+          const targetPattern = tempPatterns.find(
+            (pattern) => pattern.id === selectedPatternId
+          );
 
-      if (newElementX > dragStartX + 14) {
-        if (targetNote) {
-          targetNote.noteValue = "4n";
+          if (targetPattern) {
+            const targetInstrument = targetPattern.instruments.find(
+              (instrument) => instrument.id === selectedInstrumentId
+            );
+            if (
+              targetInstrument &&
+              targetInstrument.pianoSteps &&
+              targetInstrument.isPiano
+            ) {
+              const patternTargetNote = targetInstrument.pianoSteps.notes.find(
+                (patternTargetNote) =>
+                  patternTargetNote.noteName === selectedOctave
+              );
+
+              if (patternTargetNote) {
+                const targetNoteValue = patternTargetNote.noteValues.find(
+                  (noteValue) => noteValue.id === selectedNoteId
+                );
+
+                if (targetNoteValue) {
+                  targetNoteValue.width = targetNote.width + 1;
+                }
+                usePad.setState(() => ({ patterns: tempPatterns }));
+              }
+            }
+          }
 
           setNoteStatus(tempNoteStatus);
         }
@@ -220,6 +279,7 @@ const PianoRoll = () => {
     setSelectedOctave(null);
     setIsMove(false);
     setIsIncrease(false);
+    setIsMouseDown(false);
   };
 
   useEffect(() => {
@@ -377,21 +437,13 @@ const PianoRoll = () => {
                 id={`note-grid-${
                   key.includes("#") ? `${key.replace("#", "minor")}` : key
                 }`}
-                onMouseMove={(e) => handleMouseMove(e)}
-                onMouseUp={handleMouseUp}
               >
                 {value.map((noteValue) => (
                   <div
                     id={noteValue.id}
                     key={noteValue.id}
                     style={{
-                      width: `${
-                        noteValue.noteValue === "16n"
-                          ? "7px"
-                          : noteValue.noteValue === "8n"
-                          ? "14px"
-                          : "21px"
-                      }`,
+                      width: `${noteValue.width}px`,
                       height: "20px",
                       backgroundColor: "lime",
                       position: "absolute",
@@ -401,6 +453,9 @@ const PianoRoll = () => {
                     onMouseDown={(e) =>
                       handleMouseDown(e, noteValue.id, key, noteValue)
                     }
+                    onMouseMove={(e) => handleMouseMove(e)}
+                    onMouseUp={handleMouseUp}
+                    onMouseLeave={handleMouseUp}
                   ></div>
                 ))}
               </div>

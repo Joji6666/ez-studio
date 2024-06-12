@@ -28,7 +28,10 @@ const InstrumentSelector = () => {
 
   return (
     <section className="instrument-selector-section">
-      <article className="instrument-selector-article">
+      <article
+        className="instrument-selector-article"
+        onClick={() => console.log("is Click?")}
+      >
         <span>Instrument Files</span>
         {groups.map((group) => {
           const groupItems = instruments.filter(

@@ -7,7 +7,7 @@ import type {
   ICheckedStep,
 } from "../util/play_list_interface";
 import { v1 } from "uuid";
-import { calculateSequenceDuration } from "../../../../lib/common_function";
+
 import usePad from "../../pad/store/usePad";
 import useTopToolbar from "../../topToolbar.tsx/store/useTopToolbar";
 import useInstrument from "../../instrumentSelector/store/useInstrument";
@@ -49,14 +49,13 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
       (pattern) => pattern.id === selectedPatternId
     );
 
-    const totalDuration = calculateSequenceDuration(120, 16, "8n");
     if (targetPlayListTrack && selectedPattern) {
       targetPlayListTrack.patterns.push({
         id: v1(),
         length: selectedPattern.instruments.length,
         x: 0,
         pattern: selectedPattern.instruments,
-        totalDuration,
+        totalDuration: 0,
       });
 
       set((state) => ({
@@ -78,7 +77,7 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
             length: selectedPattern.instruments.length,
             x: 0,
             pattern: selectedPattern.instruments,
-            totalDuration,
+            totalDuration: 0,
           });
 
           set(() => ({
@@ -94,7 +93,7 @@ const usePlayList = create<IPlayListStore>((set, get) => ({
                 length: selectedPattern.instruments.length,
                 x: 0,
                 pattern: selectedPattern.instruments,
-                totalDuration,
+                totalDuration: 0,
               },
             ],
             height: 0,

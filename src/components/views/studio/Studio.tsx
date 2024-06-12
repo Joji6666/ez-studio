@@ -8,11 +8,11 @@ import Modal from "../../ui/shared/modal/Modal";
 const Studio = () => {
   return (
     <div className="studio-container">
+      <Modal />
       <TopToolbar />
       <InstrumentSelector />
       <Pad />
       <PlayList />
-      <Modal />
     </div>
   );
 };
