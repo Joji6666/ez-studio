@@ -4,15 +4,15 @@ import axios from "axios";
 import useAuth from "./store/useAuth";
 import { useNavigate } from "react-router-dom";
 
+const GOOGLE_CLIENT_ID = import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID;
+const API_URL = import.meta.env.VITE_API_URL;
+
 const GoogleLoginButton = () => {
   const { setLoginInfo } = useAuth();
   const nav = useNavigate();
 
   const handleGoogleLogin = async (credential: string) => {
-    const res = await axios.post(
-      "http://localhost:8333/api/auth/login/google",
-      credential
-    );
+    const res = await axios.post(`${API_URL}/auth/login/google`, credential);
 
     if (res) {
       localStorage.setItem("token", res.data.token);
@@ -22,11 +22,7 @@ const GoogleLoginButton = () => {
   };
   return (
     <>
-      <GoogleOAuthProvider
-        clientId={
-          "33257021890-oi8anu7gobv0qg1g1r7ohud3b98p3ru1.apps.googleusercontent.com"
-        }
-      >
+      <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
         <GoogleLogin
           text="signin"
           theme="outline"

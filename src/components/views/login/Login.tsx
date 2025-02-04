@@ -2,6 +2,7 @@ import { useState } from "react";
 import "./style/login.scss";
 import axios from "axios";
 import GoogleLoginButton from "./GoogleLoginButton";
+const API_URL = import.meta.env.VITE_API_URL;
 
 const Login = () => {
   const [isSignUp, setIsSignUp] = useState(false);
@@ -12,10 +13,7 @@ const Login = () => {
 
   const handleSignUp = async () => {
     if (isSignUp) {
-      const res = await axios.post(
-        "http://localhost:8333/api/auth",
-        authCondition
-      );
+      const res = await axios.post(`${API_URL}/auth`, authCondition);
 
       if (res) {
         console.log(res, "register Res");
@@ -26,10 +24,7 @@ const Login = () => {
   };
 
   const handleLogin = async () => {
-    const res = await axios.post(
-      "http://localhost:8333/api/auth/login",
-      authCondition
-    );
+    const res = await axios.post(`${API_URL}/auth/login`, authCondition);
 
     if (res) {
       localStorage.setItem("token", res.data);
